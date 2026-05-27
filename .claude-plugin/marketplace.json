@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "Mailchimp authoring skills for Claude Code — custom-coded MCTL templates, multilingual campaign orchestration, qualitative review + multi-template build agents, pre-upload validation.",
-    "version": "1.0.0"
+    "version": "1.0.1"
   },
   "plugins": [
     {
       "name": "mailchimp-claude-skills",
       "source": "./",
       "description": "Toolkit for authoring custom-coded responsive Mailchimp templates (MCTL placement, responsive scaffolding, Outlook hardening, WCAG 2.2 AA accessibility, CSS inlining, pre-upload validator) and orchestrating multilingual campaigns (MC_LANGUAGE field, IF:MC_LANGUAGE conditional content, segments-vs-conditional decision tree, multi-market template forking). Includes a qualitative review agent and a multi-template build agent. Brand-neutral throughout.",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "author": {
         "name": "michtio"
       },
