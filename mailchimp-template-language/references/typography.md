@@ -157,13 +157,26 @@ These render at fixed widths across clients; useful for transactional figures.
 
 ## Multi-language and character coverage
 
-Templates that go out in NL/FR/EN/DE (Belgian/European audiences) need fonts that cover **extended Latin**: accented characters (é, è, ç, ñ, ü), ligatures (œ, æ), and currency (€, £).
+Pick fonts with the script and glyph coverage your audiences need. Common cases:
 
-- Google Fonts: use the `subset=latin-ext` parameter or the `+` weight subset that includes extended Latin.
-- System fonts: Arial, Helvetica, Georgia, Verdana, Tahoma all cover extended Latin.
-- Test with real content. A subhead that reads "Belgique • France" in proof can render as "Belgique • France" with missing-glyph boxes if the font subset is wrong.
+- **Extended Latin** — accented characters (é è ç ñ ü), ligatures (œ æ), extended currency (€ £). Covers French, Spanish, German, Dutch, Italian, Portuguese, Polish, Czech, Turkish, Vietnamese, and more.
+- **Cyrillic** for Russian, Ukrainian, Bulgarian, Serbian, Macedonian.
+- **Greek** for Greek-language sends.
+- **CJK** (Chinese, Japanese, Korean) — usually needs dedicated CJK fonts with much larger file sizes; prefer system stacks (`'PingFang SC'`, `'Hiragino Sans'`, `'Noto Sans CJK'`) over web fonts for size reasons.
+- **Arabic / Hebrew** — right-to-left scripts; also affects layout direction (`dir="rtl"` on `<html>` or the language-switched element).
+- **Devanagari / Tamil / Thai / other Indic and South-East Asian scripts** — verify per-script with real content.
 
-Also set the `lang` attribute on `<html>` per audience. For multi-language sends from a single template (rare), set on the `<body>` instead and document the limitation — most clients only honor `<html lang>` for screen reader pronunciation.
+How to get the coverage:
+
+- **Google Fonts**: use the `subset=` parameter (`latin-ext`, `cyrillic`, `greek`, `vietnamese`, etc.) or the family variants that bundle them. Bigger subsets mean bigger CSS files — only request what the audience uses.
+- **System fonts**: Arial, Helvetica, Georgia, Verdana, Tahoma cover extended Latin and most Western European scripts. For non-Latin scripts, fall back to platform-native sans/serif stacks.
+- **Always test with real content.** A subhead that reads "café français" in proof can render as "caf□ fran□ais" with tofu (missing-glyph boxes) if the font subset is wrong.
+
+Set the `lang` attribute on `<html>` per audience, using region-specific codes where pronunciation or convention differs (`en-US` vs `en-GB`, `fr-FR` vs `fr-CA` vs `fr-BE`, `de-DE` vs `de-CH` vs `de-AT`, `zh-CN` vs `zh-TW`). For multi-language sends from a single template (rare — most multilingual programs use per-language audience groups or fully separate campaigns), set on the language-switched element instead:
+
+```html
+<p lang="fr">«&nbsp;Excellent service, équipe réactive.&nbsp;»</p>
+```
 
 ## Color: contrast and dark mode
 

@@ -150,7 +150,7 @@ This repo fills the gap with hand-authored MCTL tooling tuned to Mailchimp's qui
 
 Likely future skills (built when real client demand drives them):
 
-- `mailchimp-nieuwsbrief` — Belgian-bilingual newsletter patterns using `*|TRANSLATE|*` and audience groups for NL/FR/EN.
+- `mailchimp-multilingual` — Patterns for multi-language sends using `*|TRANSLATE|*`, audience groups, and per-language audience splits. Applies anywhere two or more languages share a list — Switzerland (DE/FR/IT/RM), Belgium (NL/FR/DE), Canada (EN/FR), Singapore (EN/ZH/MS/TA), and others.
 - `mailchimp-rss-driven` — Templates wired for Mailchimp's RSS-to-email automations, with `*|RSSITEM|*` patterns.
 - `mailchimp-product-feed` — E-commerce templates with product-grid merge tags for Shopify/WooCommerce integrations.
 - `mailchimp-transactional-handlebars` — Separate skill for Mandrill/Transactional (different syntax: Handlebars, not MCTL).

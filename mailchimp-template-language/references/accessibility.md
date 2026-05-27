@@ -66,18 +66,29 @@ Mailchimp's editor also lets editors set alt per-image; document this in the edi
 ## Lang attribute
 
 ```html
-<html lang="en">  <!-- single-language send -->
-<html lang="nl-BE">  <!-- Belgian Dutch -->
-<html lang="fr-BE">  <!-- Belgian French -->
+<html lang="en">     <!-- generic English -->
+<html lang="en-GB">  <!-- British English -->
+<html lang="fr-CA">  <!-- Canadian French -->
+<html lang="de-CH">  <!-- Swiss German -->
+<html lang="zh-TW">  <!-- Traditional Chinese (Taiwan) -->
 ```
 
-The `lang` attribute on `<html>` tells screen readers which pronunciation rules to use. Without it, an English screen reader reading French content sounds bizarre. For Belgian audiences, use the region-specific codes (`nl-BE`, `fr-BE`) — pronunciation differs from `nl-NL` and `fr-FR`.
+The `lang` attribute on `<html>` tells screen readers which pronunciation rules to use. Without it, an English screen reader reading French content sounds bizarre. Use **region-specific codes** wherever pronunciation, spelling, or convention differs by region — `en-US` vs `en-GB`, `fr-FR` vs `fr-CA` vs `fr-BE`, `de-DE` vs `de-CH` vs `de-AT`, `pt-PT` vs `pt-BR`, `zh-CN` vs `zh-TW`, etc. The generic `lang="en"` is a fallback when the region doesn't matter or is unknown.
 
-For mixed-language templates (rare but happens — e.g. an English newsletter with a French testimonial), set `lang` on the language-switched element:
+For mixed-language templates (rare but happens — e.g. an English newsletter with a French testimonial, or a Spanish announcement quoting an English source), set `lang` on the language-switched element:
 
 ```html
 <p lang="fr">«&nbsp;Excellent service, équipe réactive.&nbsp;»</p>
+<blockquote lang="en">"Best logistics partner we've worked with."</blockquote>
 ```
+
+For right-to-left scripts (Arabic, Hebrew, Persian, Urdu), set `dir="rtl"` alongside `lang`:
+
+```html
+<html lang="ar" dir="rtl">
+```
+
+This flips the layout direction at the HTML level. RTL email layouts also need mirrored padding / alignment in CSS — beyond `dir="rtl"`, expect to swap `padding-left` ↔ `padding-right` and `text-align:left` ↔ `text-align:right` throughout.
 
 ## Semantic structure
 

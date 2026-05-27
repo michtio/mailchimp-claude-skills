@@ -147,7 +147,7 @@ Examples (drawn directly from Mailchimp's documentation):
   Enjoy this 20% off coupon! *|COUPON20|*
 *|END:IF|*
 
-*|IF:COUNTRY=BE|*Verzending naar België.*|END:IF|*
+*|IF:COUNTRY=CA|*Free shipping across Canada.*|END:IF|*
 *|IF:PLAN!=FREE|*Premium content here.*|END:IF|*
 ```
 
@@ -158,8 +158,8 @@ Examples (drawn directly from Mailchimp's documentation):
 Mailchimp evaluates the entire string inside `*|IF:...|*` literally. There is no boolean AND/OR — `*|IF:COUNTRY=BE AND PLAN=PRO|*` will not work. Chain conditions with `*|ELSEIF:|*` or nest:
 
 ```
-*|IF:COUNTRY=BE|*
-  *|IF:PLAN=PRO|*Pro content for Belgian subscribers*|END:IF|*
+*|IF:COUNTRY=DE|*
+  *|IF:PLAN=PRO|*Pro content for subscribers in Germany*|END:IF|*
 *|END:IF|*
 ```
 
