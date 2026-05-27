@@ -17,3 +17,6 @@ venv/
 # Test outputs from validator
 test-*.html
 *.test.html
+
+# Local drafts (not committed)
+_drafts/

@@ -19,7 +19,7 @@ If this project saves you time, consider supporting its development:
 # Claude Code Plugin (recommended)
 # First time: add the marketplace, then install
 /plugin marketplace add michtio/mailchimp-claude-skills
-/plugin install mailchimp-claude-skills@michtio/mailchimp-claude-skills
+/plugin install mailchimp-claude-skills@mailchimp-claude-skills
 
 # Or clone manually
 git clone https://github.com/michtio/mailchimp-claude-skills.git ~/.claude/mailchimp-claude-skills
