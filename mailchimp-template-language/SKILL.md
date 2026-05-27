@@ -35,15 +35,53 @@ Do **not** use this skill for:
 
 ## Workflow
 
-When asked to build or modify a Mailchimp template:
+When asked to build or modify a Mailchimp template, work through these phases. Each phase points to the reference file that owns its concern — load only what's relevant to the current request.
 
-1. **Identify what's being requested**: a brand-new template, edits to an existing one, or conversion of static HTML to MCTL.
-2. **Load `references/structure.md`** before generating any HTML. It contains the responsive table skeleton, the doctype, the head, and the Outlook conditionals. Do not improvise this — email HTML is unforgiving.
-3. **Load `references/mc-attributes.md`** when the user wants editable regions, repeatable blocks, variants, or hideable content. Critical: placement rules for `mc:edit` (only on containing elements, never on inline elements, naming conventions for template-switching).
-4. **Load `references/merge-tags.md`** when the user mentions personalization, dynamic content, conditional sections, or required footer/unsubscribe links.
-5. **Load `references/responsive.md`** when the user asks about mobile rendering, fluid layouts, Outlook fallbacks, or dark mode.
-6. **Use `assets/skeleton.html`** as the starting point for any new template. Copy it, then customize. Do not write a Mailchimp template from a blank file.
-7. **Validate with `scripts/validate.py`** before declaring the template ready. It catches the four most common Mailchimp import failures.
+### Phase 1 — Identify the work
+
+What is being requested? A brand-new template, edits to an existing one, conversion of static HTML to MCTL, or refactor of an existing Mailchimp template? Confirm with the user before assuming.
+
+### Phase 2 — Pick the archetype (new templates)
+
+For new templates, **load `references/blueprints.md`** and pick the archetype that matches the campaign type (newsletter, promotional, transactional, announcement, re-engagement). The blueprint defines section order, the `mc:edit` taxonomy, and which blocks should be repeatable or hideable.
+
+### Phase 3 — Establish the scaffold
+
+**Load `references/structure.md`** before generating any HTML. It contains the doctype, the head block, the Outlook MSO conditionals, and the three-table body nest. Do not improvise — email HTML is unforgiving and the head block has client-specific requirements you can't infer.
+
+Then **start from `assets/skeleton.html`** as the structural baseline. Copy it, don't recreate it.
+
+### Phase 4 — Define the visual layer (per project)
+
+**Load `references/typography.md`** to set up the token slots (colors, fonts, type scale, line-height ratios). Fill in the brand's actual values — the skill does not impose a default palette or font.
+
+### Phase 5 — Compose content blocks
+
+**Load `references/patterns.md`** when assembling sections: the eyebrow→headline→subhead rhythm, repeatable card grids with hideable filler, multi-column footer, contact blocks, pull quotes, stat rows, dividers, button variants, feature lists.
+
+**Load `references/mc-attributes.md`** alongside, to confirm placement rules for `mc:edit` (containing elements only — never inline), `mc:repeatable` (single element, usually `<tr>` or `<table>`), `mc:variant`, and `mc:hideable`. Naming conventions matter for Switch-Template compatibility.
+
+### Phase 6 — Personalization and dynamic content
+
+**Load `references/merge-tags.md`** when the user mentions personalization, conditional sections, dynamic content, or required compliance tags (`*|UNSUB|*`, `*|LIST:ADDRESS|*`). Includes operator support, IFNOT, conditional nesting, and the escape syntax for displaying literal merge tags.
+
+### Phase 7 — Mobile, dark mode, Outlook hardening
+
+**Load `references/responsive.md`** when the template needs to render across viewports: fluid hybrid pattern, media-query mobile rules, dark mode (Apple Mail + Outlook.com auto-inversion mitigation), bulletproof buttons, retina images, web font loading.
+
+### Phase 8 — Accessibility pass
+
+**Load `references/accessibility.md`** for any template that will ship to a real audience. Covers WCAG AA contrast targets, alt text patterns (decorative vs informative), lang attribute, semantic heading order, `role="presentation"` on layout tables, link text, and email-specific patterns (preview text, view-in-browser, plain-text alternative). Not optional for professional output.
+
+### Phase 9 — Inline and validate
+
+**Load `references/inliner.md`** if the template uses complex selectors or will be sent through multiple ESPs. Mailchimp's built-in inliner is sufficient for most cases; pre-inline with Juice or Premailer when you need a deterministic artifact.
+
+**Run `scripts/validate.py`** before declaring the template ready. It catches the structural mistakes that silently break Mailchimp imports — inline `mc:edit`, nested `mc:edit`, duplicate names, missing compliance tags, oversized HTML.
+
+### Phase 10 — Report
+
+After generating, briefly summarize the editable regions, repeatable blocks, hideable sections, and merge tags used. The user needs to know what the Mailchimp editor will expose before they hand the template to a non-technical editor.
 
 ## Hard rules
 

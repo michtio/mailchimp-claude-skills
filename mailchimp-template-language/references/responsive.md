@@ -273,8 +273,10 @@ Web fonts:
 Outlook will fall through to your `font-family` stack. Always provide a fallback stack:
 
 ```css
-font-family: 'Inter', Arial, Helvetica, sans-serif;
+font-family: '{{ web-font }}', Arial, Helvetica, sans-serif;
 ```
+
+(See `typography.md` for token conventions.)
 
 System fonts that work everywhere without import:
 - `Arial, Helvetica, sans-serif` (sans-serif)

@@ -43,20 +43,27 @@ Upload via the Files API and reference in your skills config. See [Anthropic's s
 
 ```
 mailchimp-template-language/
-├── SKILL.md                       # Trigger description + workflow
+├── SKILL.md                       # Trigger description + phased workflow
 ├── README.md                      # This file
 ├── references/
 │   ├── structure.md               # Doctype, head, table skeleton, Outlook conditionals
 │   ├── mc-attributes.md           # mc:edit / mc:repeatable / mc:variant / mc:hideable
 │   ├── merge-tags.md              # *|TAG|* syntax, conditionals, required compliance
-│   └── responsive.md              # Fluid hybrid, media queries, dark mode, bulletproof buttons
+│   ├── responsive.md              # Fluid hybrid, media queries, dark mode, bulletproof buttons
+│   ├── patterns.md                # Brand-neutral content blocks (section openers, cards, footers, etc.)
+│   ├── typography.md              # Token-slot system, type scale, web-font loading
+│   ├── blueprints.md              # Structural archetypes: newsletter, promo, transactional, announcement, re-engagement
+│   ├── accessibility.md           # WCAG AA contrast, alt text, lang, role=presentation, semantic order
+│   └── inliner.md                 # CSS inlining workflow (Juice/Premailer), what survives Gmail web
 ├── assets/
-│   └── skeleton.html              # Working starter: 600px responsive, all MCTL features wired
+│   └── skeleton.html              # Working starter: 600px responsive, all MCTL features wired, brand-neutral
 └── scripts/
     └── validate.py                # Pre-upload validator (Python 3.10+, stdlib only)
 ```
 
 References load on demand — `SKILL.md` stays small. Claude only pulls in the relevant file when the conversation needs it.
+
+**Brand-neutral by design.** The skill provides patterns, token slots, and structural blueprints — it does not impose a default visual direction. Real-world templates with brand-specific palettes, fonts, and content live in their own repos; the skill is the toolkit, not the example.
 
 ## Usage examples
 
