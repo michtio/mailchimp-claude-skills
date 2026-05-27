@@ -87,7 +87,7 @@ After generating, briefly summarize the editable regions, repeatable blocks, hid
 
 Things that will silently break a template if violated. Memorize these:
 
-- **`mc:edit` on a `<td>` or `<div>` only.** Never on `<span>`, `<a>`, `<strong>`, or any inline element. Never on `<table>` itself — use the containing `<td>`.
+- **`mc:edit` on a `<td>`, `<th>`, or `<div>` only.** Never on `<span>`, `<a>`, `<strong>`, or any inline element. Never on `<table>` itself — use the containing `<td>`.
 - **`mc:edit` names must be unique within a template** AND should be **consistent across templates** if the user might switch templates on an existing campaign. `header`, `body`, `sidecolumn`, `footer`, `header_image` are the conventional names — use these.
 - **Never nest `mc:edit` regions.** A `mc:edit` inside another `mc:edit` will not import.
 - **`mc:repeatable` blocks require a unique `mc:repeatable` value** (the "block type" name) and every editable region inside them needs an `mc:edit` name. Mailchimp prefixes the editable names per instance automatically.

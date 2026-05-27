@@ -228,7 +228,7 @@ Minimal — announcements are intentionally short and focused. The only optional
 
 - Resist adding sections. The discipline of a single-focus email is the point.
 - The big-statement block should pass the "read it in 3 seconds" test. If it requires reading 30 words to understand the headline, it's too long.
-- The signature should be a real person; "The Team at X" is weaker than "Sarah Janssens, CEO".
+- The signature should be a real person; "The Team at X" is weaker than a named individual with a role ("Jordan Lee, CEO").
 
 ---
 

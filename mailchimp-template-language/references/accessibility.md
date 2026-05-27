@@ -98,10 +98,10 @@ This flips the layout direction at the HTML level. RTL email layouts also need m
 
 ```html
 <h1>Issue 27 — May 2026</h1>          <!-- hero, once -->
-<h2>This month's availabilities</h2>   <!-- main section -->
-<h3>Belgium</h3>                       <!-- subsection -->
-<h3>Netherlands</h3>
-<h2>Market signal</h2>                 <!-- next main section -->
+<h2>This month's updates</h2>          <!-- main section -->
+<h3>Product</h3>                       <!-- subsection -->
+<h3>Engineering</h3>
+<h2>Community spotlight</h2>           <!-- next main section -->
 ```
 
 Don't use heading tags for visual styling. A "looks like a heading but isn't structurally one" should be a styled `<div>` or `<p>`, not `<h2>`.
@@ -171,14 +171,17 @@ On mobile, tap targets should be **at least 44×44px** (Apple HIG / WCAG 2.5.5 A
     padding: 16px 24px !important;
     /* Total touch area: full width × ~50px tall = comfortable tap */
   }
-  a {
-    /* Don't let inline links collapse to single-line tall on mobile */
-    line-height: 1.6;
+  /* Scope to a class — global `a` would over-space inline links inside copy. */
+  .nav-link-mobile,
+  .footer-link-mobile {
+    line-height: 1.8 !important;
+    display: inline-block;
+    padding: 4px 0;
   }
 }
 ```
 
-Stacked footer links on mobile especially — `line-height: 1.8;` on the link column gives 30+px between targets and prevents misfires.
+Apply `class="nav-link-mobile"` or `class="footer-link-mobile"` on `<a>` elements in stacked nav rows and footer link columns. Don't put line-height on the bare `a` selector — inline body links would wrap with awkward leading.
 
 ## Email-specific accessibility patterns
 
@@ -188,7 +191,7 @@ Stacked footer links on mobile especially — `line-height: 1.8;` on the link co
 
 ```
 Bad:  "You won't believe what's inside..."
-Good: "May availabilities — 4 new sites in Belgium, 3 in Netherlands."
+Good: "Q2 product update — 3 new features, faster exports, new API endpoints."
 ```
 
 ### View-in-browser link near the top

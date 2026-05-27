@@ -9,7 +9,7 @@ A folder following the [Agent Skills spec](https://github.com/anthropics/skills)
 - Generate responsive, Outlook-hardened HTML email templates from scratch.
 - Convert static HTML emails into Mailchimp-editable templates (add `mc:edit` regions, repeatables, merge tags).
 - Refactor existing Mailchimp templates (split sections into variants, add hideable rows, normalize naming conventions for Switch Templates compatibility).
-- Validate templates before upload to catch the four most common Mailchimp import failures.
+- Validate templates before upload to catch the common Mailchimp import failures.
 
 ## Why this exists
 

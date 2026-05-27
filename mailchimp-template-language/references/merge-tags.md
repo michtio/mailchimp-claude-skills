@@ -83,19 +83,19 @@ Custom field tags use whatever was set in audience settings — e.g., `*|COMPANY
 
 ### Default values
 
-Always provide a fallback for personalization. `Hi *|FNAME|*` produces `Hi ` when the field is blank — ugly. Use:
+Always provide a fallback for personalization. `Hi *|FNAME|*` produces `Hi ` when the field is blank — ugly. Use the long form:
 
 ```
-Hi *|FNAME|*,    →    Hi *|IF:FNAME|**|FNAME|**|ELSE:|*there*|END:IF|*,
+Hi *|IF:FNAME|**|FNAME|**|ELSE:|*there*|END:IF|*,
 ```
 
-Or the shorter syntax:
+Or the shorter fallback syntax:
 
 ```
 Hi *|FNAME|fallback:there|*,
 ```
 
-Either way produces "Hi Friend," for known recipients and "Hi there," for unknowns.
+Both produce `Hi <recipient first name>,` for known subscribers and `Hi there,` for unknowns.
 
 ## Conditional content
 
@@ -216,7 +216,7 @@ Tags in `href` attributes get expanded too:
 | `*|LIST:DESCRIPTION|*` | Audience description |
 | `*|LIST:SUBSCRIBE|*` | Signup form URL |
 | `*|LIST:UNSUBSCRIBE|*` | Hosted unsubscribe page URL |
-| `*|TRANSLATE:lang|*` | Translation of a sentence to a target language |
+| `*|TRANSLATE:lang|*…*|END:TRANSLATE|*` | **Block tag.** Wraps content for machine translation to the target language. Open + close form required; not a single-tag substitution. |
 | `*|INTERESTS|*` | List of subscriber's interests (group memberships) |
 
 ## Tags Mailchimp does NOT support (common mistakes)

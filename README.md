@@ -134,7 +134,7 @@ Each generated template goes through this flow:
 
 The skill is the **authoring** layer. Pair with these for **deployment** and **rendering verification**:
 
-- [`damientilman/mailchimp-mcp-server`](https://github.com/damientilman/mailchimp-mcp-server) — 53 tools across the Mailchimp Marketing API (templates, campaigns, audiences). Install via `uvx mailchimp-mcp-server`.
+- [`damientilman/mailchimp-mcp-server`](https://github.com/damientilman/mailchimp-mcp-server) — 112 tools across the Mailchimp Marketing API (campaigns, audiences, reports, segments, automations, e-commerce). Read-only and dry-run safety modes. Install via `uvx mailchimp-mcp-server`.
 - [Composio's hosted Mailchimp MCP](https://mcp.composio.dev/mailchimp) — OAuth alternative if you don't want to manage API keys.
 - [Litmus](https://litmus.com/) / [Email on Acid](https://www.emailonacid.com/) — cross-client render testing. The skill cannot test rendering itself; these can.
 

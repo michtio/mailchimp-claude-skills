@@ -200,7 +200,7 @@ Repeatable, useful for newsletters that name a contact person, multi-author sign
           <div mc:edit="contact_label" style="font-family:{{ body-font }}; font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:{{ color-muted }};">Questions about X?</div>
           <div mc:edit="contact_name" style="font-family:{{ heading-font }}; font-size:15px; font-weight:600; color:{{ color-foreground }};">Person name</div>
           <div mc:edit="contact_meta" style="font-family:{{ body-font }}; font-size:13px; color:{{ color-muted }};">
-            <a href="tel:...">+32 ...</a> &middot; <a href="mailto:...">name@brand.com</a>
+            <a href="tel:+1234567890">+1 (234) 567-890</a> &middot; <a href="mailto:name@brand.com">name@brand.com</a>
           </div>
         </td>
       </tr>

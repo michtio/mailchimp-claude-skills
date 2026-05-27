@@ -14,7 +14,7 @@ The fundamental attribute. Marks a container as user-editable in the Mailchimp c
 
 ### Placement rules
 
-- Apply to **container elements only**: `<td>`, `<div>`. Never on `<table>`, `<tr>`, or any inline element.
+- Apply to **container elements only**: `<td>`, `<th>`, or `<div>`. Never on `<table>`, `<tr>`, or any inline element.
 - Apply to a **single element wrapping the editable content**, not multiple sibling elements.
 - The entire contents of the marked element become editable. The element itself stays put (it's the container, not the content).
 
@@ -183,7 +183,7 @@ This is mostly relevant if you're building a template that mixes hand-coded regi
 
 | Attribute | Placement | Value | Effect |
 |---|---|---|---|
-| `mc:edit="name"` | `<td>` or `<div>` | unique region name | Marks contents as user-editable |
+| `mc:edit="name"` | `<td>`, `<th>`, or `<div>` | unique region name | Marks contents as user-editable |
 | `mc:repeatable="type"` | single element (often `<tr>`) | block type name | User can duplicate this block |
 | `mc:variant="name"` | same element as `mc:repeatable` | variant name | Alternative design for the block type |
 | `mc:hideable=""` | single element | empty or `"hide"` | User can toggle block visibility |
