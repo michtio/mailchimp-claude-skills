@@ -81,6 +81,16 @@ def find_mc_repeatables(html: str) -> list[tuple[str, str, int]]:
     return results
 
 
+# HTML void elements have no children and no closing tag, so they cannot
+# contain a nested mc:edit. Without this list, the walk below never finds a
+# `</img>` and erroneously reports every downstream mc:edit as nested inside
+# the img — a cascade that produces hundreds of false-positive errors.
+VOID_ELEMENTS = {
+    "img", "br", "hr", "input", "meta", "link",
+    "area", "base", "col", "embed", "param", "source", "track", "wbr",
+}
+
+
 def check_nested_mc_edits(html: str) -> list[tuple[int, int]]:
     """Find mc:edit regions nested inside other mc:edit regions.
     Returns list of (outer_line, inner_line).
@@ -100,6 +110,8 @@ def check_nested_mc_edits(html: str) -> list[tuple[int, int]]:
         if not outer_tag_match:
             continue
         tag = outer_tag_match.group(1).lower()
+        if tag in VOID_ELEMENTS:
+            continue
         # Walk forward, tracking depth of this same tag, until we close it
         depth = 1
         pos = outer.end()

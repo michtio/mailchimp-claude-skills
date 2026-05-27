@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.0.1 -- 2026-05-27
+
+### Fixed
+
+- **Validator: false-positive nesting cascade on `<img mc:edit>`.** `check_nested_mc_edits` walked forward looking for `</img>` to balance scope, which never exists for a void element. Every downstream `mc:edit` was then reported as nested inside the img, producing hundreds of bogus errors on any template using image regions (Mailchimp's docs explicitly permit `mc:edit` on `<img>`). Added a `VOID_ELEMENTS` set covering `img`, `br`, `hr`, `input`, `meta`, `link`, `area`, `base`, `col`, `embed`, `param`, `source`, `track`, `wbr` and short-circuit the nesting walk when the outer tag is void. Real nested-`mc:edit` cases in container elements (`<div>`, `<td>`, etc.) are still detected.
+
 ## 1.0.0 -- 2026-05-27
 
 Initial release of `mailchimp-claude-skills`. Ships two brand-neutral skills, two agents, and supporting infrastructure for authoring custom-coded Mailchimp email templates and orchestrating multilingual campaigns.
