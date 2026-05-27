@@ -4,7 +4,7 @@ The non-negotiable scaffold for any responsive email. Email clients are 1998-era
 
 ## Doctype and root
 
-Use HTML 4.01 Transitional. XHTML strict will break Outlook. HTML5 doctype works in modern clients but Outlook desktop is the lowest common denominator.
+Use **XHTML 1.0 Transitional**. Mailchimp doesn't mandate a doctype (their import runs the HTML through the W3C validator, but accepts any valid HTML), so the choice is driven by client compatibility. XHTML 1.0 Transitional is the industry consensus for email because Outlook desktop (Word rendering engine) renders it most predictably. HTML5 works in modern clients but introduces subtle layout differences in Outlook 2007–2019.
 
 ```html
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

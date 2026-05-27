@@ -11,9 +11,9 @@ A folder following the [Agent Skills spec](https://github.com/anthropics/skills)
 - Refactor existing Mailchimp templates (split sections into variants, add hideable rows, normalize naming conventions for Switch Templates compatibility).
 - Validate templates before upload to catch the four most common Mailchimp import failures.
 
-## Why this exists (and not MJML)
+## Why this exists
 
-MJML is the popular abstraction for responsive email, but its parser strips unknown XML attributes during compilation — including all `mc:*` attributes. Hand-authored MCTL is the only reliable path for Mailchimp custom templates. This skill encodes the table-based responsive patterns so Claude doesn't have to rediscover them every conversation.
+Mailchimp's custom-coded template format (MCTL) requires hand-written HTML — the `mc:*` editor attributes need to survive intact through import, and the merge-tag syntax has no preprocessor. This skill encodes the table-based responsive patterns, MCTL placement rules, and merge-tag conventions so Claude doesn't have to rediscover them every conversation.
 
 ## Install
 

@@ -1,6 +1,6 @@
 ---
 name: mailchimp-template-language
-description: Author and edit custom-coded Mailchimp email templates using Mailchimp Template Language (MCTL). Use this skill when the user mentions Mailchimp templates, mc:edit, mc:repeatable, mc:variant, mc:hideable, merge tags like *|FNAME|* or *|UNSUB|*, conditional blocks like *|IF:...|*, importing custom HTML into Mailchimp, MCTL, or building responsive email templates for Mailchimp campaigns. Also use when the user wants to add editable regions, repeatable blocks, or A/B variants to an HTML email destined for Mailchimp. Do NOT use for MJML (MJML strips mc:* attributes during compilation), generic transactional email, Mandrill/Handlebars templates, or non-Mailchimp ESPs.
+description: Author and edit custom-coded Mailchimp email templates using Mailchimp Template Language (MCTL). Use this skill when the user mentions Mailchimp templates, mc:edit, mc:repeatable, mc:variant, mc:hideable, merge tags like *|FNAME|* or *|UNSUB|*, conditional blocks like *|IF:...|*, importing custom HTML into Mailchimp, MCTL, or building responsive email templates for Mailchimp campaigns. Also use when the user wants to add editable regions, repeatable blocks, or A/B variants to an HTML email destined for Mailchimp. Do NOT use for generic transactional email, Mandrill/Handlebars templates, or non-Mailchimp ESPs.
 license: MIT
 ---
 
@@ -29,7 +29,6 @@ Trigger this skill when:
 
 Do **not** use this skill for:
 
-- MJML authoring (MJML strips `mc:*` attributes during compile; use `framix-team/skill-email-html-mjml` if MJML is what they want).
 - Mandrill / Mailchimp Transactional (uses Handlebars by default, not MCTL).
 - Generic HTML email for non-Mailchimp ESPs (no merge tags, no `mc:` attributes).
 - Mailchimp campaign/audience management — that's an MCP server job (`damientilman/mailchimp-mcp-server`), not a template skill.

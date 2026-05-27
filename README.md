@@ -10,7 +10,7 @@ Anthropic Agent Skills for working with Mailchimp from Claude (Claude Code, Clau
 
 ## Why this repo exists
 
-Across the public Anthropic Skills ecosystem (anthropics/skills, obra/superpowers, wshobson/agents, ComposioHQ/awesome-claude-skills, and several smaller catalogs), as of mid-2026 there is no skill that targets Mailchimp's template language directly. Skills named "Mailchimp" are uniformly API/MCP wrappers that operate on existing templates — none of them help Claude *author* a custom-coded MCTL template. MJML, the popular abstraction for responsive email, can't fill the gap either because its parser strips `mc:*` attributes during compilation.
+Across the public Anthropic Skills ecosystem (anthropics/skills, obra/superpowers, wshobson/agents, ComposioHQ/awesome-claude-skills, and several smaller catalogs), as of mid-2026 there is no skill that targets Mailchimp's template language directly. Skills named "Mailchimp" are uniformly API/MCP wrappers that operate on existing templates — none of them help Claude *author* a custom-coded MCTL template.
 
 This repo fills that gap with hand-authored MCTL skills tuned to Mailchimp's quirks.
 

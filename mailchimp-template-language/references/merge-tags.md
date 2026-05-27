@@ -113,17 +113,57 @@ The full conditional syntax:
 
 The `ELSEIF` and `ELSE` clauses are optional. Note the trailing colons (`*|ELSE:|*`, `*|END:IF|*`) — those are required by the parser.
 
-### Comparison operators
+### IFNOT — inverse condition
+
+For "show this only when the field is empty/falsy", use `IFNOT` instead of writing an empty IF branch:
 
 ```
-*|IF:AGE=21|*Happy 21st!*|END:IF|*
+*|IFNOT:FNAME|*Hey there! It looks like we're missing your name.*|END:IF|*
+```
+
+`IFNOT` is what Mailchimp's docs use for the "missing data" pattern. Closes with the same `*|END:IF|*`.
+
+### Comparison operators
+
+Mailchimp supports six operators:
+
+| Operator | Meaning |
+|---|---|
+| `=` | equal to |
+| `!=` | not equal to |
+| `>` | greater than |
+| `<` | less than |
+| `>=` | greater than or equal to |
+| `<=` | less than or equal to |
+
+Examples (drawn directly from Mailchimp's documentation):
+
+```
+*|IF:AGE >= 18|*Don't forget to vote this Tuesday!*|END:IF|*
+
+*|IF:TRANSACTIONS >= 20|*
+  Enjoy this 40% off coupon! *|COUPON40|*
+*|ELSEIF:TRANSACTIONS >= 10|*
+  Enjoy this 20% off coupon! *|COUPON20|*
+*|END:IF|*
+
 *|IF:COUNTRY=BE|*Verzending naar België.*|END:IF|*
 *|IF:PLAN!=FREE|*Premium content here.*|END:IF|*
 ```
 
-Supported operators: `=`, `!=`. There's no `<`, `>`, `<=`, `>=` — Mailchimp's conditional engine treats values as strings.
+**Important caveat:** for numeric comparisons (`<`, `>`, `<=`, `>=`) to behave predictably, the merge field must be configured as a **number-type field** in the audience settings. Comparing text-type fields with numeric operators produces inconsistent results because Mailchimp's parser falls back to string comparison.
 
-### Truthy/falsy
+### No AND / OR inside a single condition
+
+Mailchimp evaluates the entire string inside `*|IF:...|*` literally. There is no boolean AND/OR — `*|IF:COUNTRY=BE AND PLAN=PRO|*` will not work. Chain conditions with `*|ELSEIF:|*` or nest:
+
+```
+*|IF:COUNTRY=BE|*
+  *|IF:PLAN=PRO|*Pro content for Belgian subscribers*|END:IF|*
+*|END:IF|*
+```
+
+### Truthy/falsy (when no operator is used)
 
 - Empty string, missing field, or literal `0` → falsy.
 - Any non-empty value → truthy.
@@ -133,6 +173,10 @@ So `*|IF:DISCOUNT_CODE|*Use code *|DISCOUNT_CODE|* at checkout.*|END:IF|*` shows
 ### Nesting
 
 Conditionals can nest. Keep nesting shallow — Mailchimp's parser tolerates two or three levels but readability collapses fast. If you need more, restructure with `*|ELSEIF|*`.
+
+### Block-scope requirement
+
+A conditional must open and close within the same content block (the same `mc:edit` region, or the same top-level body if no editable regions). Splitting an `*|IF:...|*` across two `mc:edit` regions silently breaks at send time.
 
 ## Date and number formatting
 
@@ -179,12 +223,23 @@ Tags in `href` attributes get expanded too:
 
 - No loops. `*|FOREACH|*` doesn't exist. Repeatable blocks (`mc:repeatable`) are the editor-side equivalent.
 - No template includes/partials. Each template is self-contained.
-- No JavaScript-style expressions. `*|IF:AGE>=21|*` does not work.
+- No boolean AND/OR inside a single IF. Chain with `*|ELSEIF:|*` or nest. (Comparison operators `<`, `>`, `<=`, `>=`, `=`, `!=` are supported — see above.)
 - No tag inside a tag. `*|IF:*|FNAME|*|*` is invalid; you'd write `*|IF:FNAME|*`.
+- No arithmetic expressions. `*|IF:AGE+1>=18|*` won't evaluate. Compute the value before sending if you need it, or use `*|DATE_ADD:...|*` for date math (the only documented arithmetic helper).
 
-## Tag escaping in code blocks
+## Displaying a literal merge tag (escaping)
 
-If you actually want to display the literal string `*|FNAME|*` in an email (rare, but happens in docs), escape with `*||*FNAME*||*` — this won't render but Mailchimp will pass it through. Or just embed in an image.
+Mailchimp does not officially document an escape syntax. To display the literal string `*|FNAME|*` in an email body (rare — most often when writing documentation about MCTL inside an email), use **HTML entity encoding** to break the parser's pattern match without changing the rendered output:
+
+```html
+*&#124;FNAME|*
+```
+
+`&#124;` is the HTML entity for `|`. Mailchimp's parser scans the raw source for the literal byte sequence `*|...|*` and skips this token, but the email client renders the entity as a pipe — so the recipient sees `*|FNAME|*` exactly as intended.
+
+The same trick works for the asterisk if you need it: `&#42;|FNAME|&#42;`. Encode either of the boundary characters; you don't need to encode both pipes.
+
+Alternative: embed the literal text as an image. Heavier but bulletproof for any future parser changes.
 
 ## Testing merge tags
 
