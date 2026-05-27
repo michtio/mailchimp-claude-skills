@@ -65,7 +65,7 @@ Custom names are fine for one-off templates. For agency-style template families 
 ```html
 <!-- Right: on a containing td -->
 <td mc:edit="cta_button" align="center" style="padding:24px;">
-  <a href="*|MC:URL|*" style="background:#2E114B; color:#fff; padding:12px 24px; text-decoration:none; display:inline-block;">Click here</a>
+  <a href="*|MC:URL|*" style="background:#3b82f6; color:#fff; padding:12px 24px; text-decoration:none; display:inline-block;">Click here</a>
 </td>
 
 <!-- Right: on a div inside a td (also fine) -->
@@ -144,22 +144,32 @@ In the editor, the user sees a single "Product" block in the Add Block menu, wit
 Lets the user hide an entire block from the editor without deleting it.
 
 ```html
-<tr mc:hideable="">
+<tr mc:hideable>
   <td mc:edit="promo_section" style="padding:24px; background:#fff8e1;">
     <p>Special offer this month!</p>
   </td>
 </tr>
 ```
 
-The empty value (`mc:hideable=""`) is correct. The user toggles visibility per-campaign in the editor.
+### Documented form: valueless
 
-For a section that defaults to hidden:
+Mailchimp's official template-language docs specify `mc:hideable` as a **valueless attribute**. The bare form (no `="..."`) is the spec. The empty form `mc:hideable=""` is equivalent and acceptable HTML.
+
+### Named form: community convention
+
+A widespread pattern in production templates labels each hideable block with a name:
 
 ```html
-<tr mc:hideable="hide">
-  <td>...</td>
-</tr>
+<tr mc:hideable="filler">
+<tr mc:hideable="sustainability">
+<tr mc:hideable="social_proof">
 ```
+
+The named form works reliably (the editor accepts it; tested in production) and gives editors a recognizable label per block when toggling visibility. It is **not in Mailchimp's official documentation** — it's community convention, but a stable one. Use it when you have multiple hideable blocks in a template and want them distinguishable in the editor UI.
+
+### What `mc:hideable` does NOT do
+
+There is no documented way to default a block to hidden via the template attribute. Initial visibility (on/off per campaign) is controlled by the editor, not the template. Older community guides occasionally claim `mc:hideable="hide"` defaults hidden — this is not supported by Mailchimp's docs and should not be relied on.
 
 ## `mc:allowdesignmodule` — drag-and-drop drop zones
 
@@ -186,7 +196,7 @@ This is mostly relevant if you're building a template that mixes hand-coded regi
 | `mc:edit="name"` | `<td>`, `<th>`, or `<div>` | unique region name | Marks contents as user-editable |
 | `mc:repeatable="type"` | single element (often `<tr>`) | block type name | User can duplicate this block |
 | `mc:variant="name"` | same element as `mc:repeatable` | variant name | Alternative design for the block type |
-| `mc:hideable=""` | single element | empty or `"hide"` | User can toggle block visibility |
+| `mc:hideable` | single element | valueless (spec) or `="label"` (convention) | User can toggle block visibility |
 | `mc:allowdesignmodule="..."` | container | `all` or block list | Accepts drag-and-drop content blocks |
 
 ## Order of attributes on a single element
@@ -194,7 +204,7 @@ This is mostly relevant if you're building a template that mixes hand-coded regi
 When multiple `mc:*` attributes appear on the same element, order doesn't matter to Mailchimp's parser. For readability, use:
 
 ```html
-<tr mc:repeatable="product" mc:variant="featured" mc:hideable="">
+<tr mc:repeatable="product" mc:variant="featured" mc:hideable>
 ```
 
 ## Common import failures and what causes them

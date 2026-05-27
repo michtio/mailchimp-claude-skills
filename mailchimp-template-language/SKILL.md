@@ -1,6 +1,6 @@
 ---
 name: mailchimp-template-language
-description: Author and edit custom-coded Mailchimp email templates using Mailchimp Template Language (MCTL). Use this skill when the user mentions Mailchimp templates, mc:edit, mc:repeatable, mc:variant, mc:hideable, merge tags like *|FNAME|* or *|UNSUB|*, conditional blocks like *|IF:...|*, importing custom HTML into Mailchimp, MCTL, or building responsive email templates for Mailchimp campaigns. Also use when the user wants to add editable regions, repeatable blocks, or A/B variants to an HTML email destined for Mailchimp. Do NOT use for generic transactional email, Mandrill/Handlebars templates, or non-Mailchimp ESPs.
+description: Author and edit custom-coded Mailchimp email templates using Mailchimp Template Language (MCTL). Use this skill when the user mentions Mailchimp templates, mc:edit, mc:repeatable, mc:variant, mc:hideable, merge tags like *|FNAME|* or *|UNSUB|*, conditional blocks like *|IF:...|*, importing custom HTML into Mailchimp, MCTL, or building responsive email templates for Mailchimp campaigns. Also use when the user wants to add editable regions, repeatable blocks, or block design variants to an HTML email destined for Mailchimp. Do NOT use for generic transactional email, Mandrill/Handlebars templates, or non-Mailchimp ESPs.
 license: MIT
 ---
 
@@ -8,7 +8,7 @@ license: MIT
 
 ## What this skill covers
 
-Authoring **custom-coded HTML email templates** for Mailchimp's classic email builder: the template language that turns a flat HTML file into a Mailchimp-editable template with drag-and-drop regions, repeatable blocks, A/B variants, and conditional content.
+Authoring **custom-coded HTML email templates** for Mailchimp's "Code your own" template flow: the template language that turns a flat HTML file into a Mailchimp-editable template with drag-and-drop regions, repeatable blocks, block design variants, and conditional content.
 
 Two distinct concerns are merged in MCTL and you must keep them separate:
 
@@ -23,7 +23,7 @@ Trigger this skill when:
 
 - The user is writing or editing HTML destined for Mailchimp's "Code your own → Paste in code" or "Import zip" flow.
 - The user mentions `mc:edit`, `mc:repeatable`, `mc:variant`, `mc:hideable`, or merge tags.
-- The user wants to add editable regions, repeatable cards, A/B variants, or conditional content to an existing HTML email.
+- The user wants to add editable regions, repeatable cards, block design variants, or conditional content to an existing HTML email.
 - The user asks to convert a static HTML email into a Mailchimp-editable template.
 - The user wants a responsive email skeleton for Mailchimp.
 
@@ -94,7 +94,7 @@ Things that will silently break a template if violated. Memorize these:
 - **The required footer merge tags are non-negotiable**: `*|LIST:ADDRESS|*` and an unsubscribe link wrapping `*|UNSUB|*` (or `*|HTML:LIST:ADDRESS_HTML|*` + unsub). Omit them and Mailchimp will inject its own footer, which clients hate.
 - **Use `*|MC_PREVIEW_TEXT|*` in the body**, not just rely on hidden preheader text. Mailchimp pulls preview text from this tag for the inbox preview.
 - **Image dimensions are mandatory.** Every `<img>` needs `width`, `height`, and `style="display:block"`. Outlook will explode otherwise.
-- **Inline all CSS that matters.** Mailchimp's CSS inliner is good but not perfect; assume Gmail's `<style>` stripping is the worst case and inline anything critical.
+- **Critical CSS must survive as inline `style=""` attributes on the element.** Mailchimp's auto-inliner handles most cases — see `references/inliner.md` for when to pre-inline with Juice or Premailer. The reason this matters: Gmail web strips `<style>` blocks aggressively, so any visual rule that has to render in Gmail must end up inlined.
 
 ## Output expectations
 

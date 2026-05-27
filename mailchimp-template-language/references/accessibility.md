@@ -51,7 +51,7 @@ Logos, content images, photographs, charts:
 ```html
 <img src="..." width="180" height="40" alt="Brand wordmark" style="display:block;">
 <img src="..." width="600" height="400" alt="Aerial view of the Aalst warehouse, 18,400 m²" style="display:block;">
-<img src="..." width="600" height="400" alt="Bar chart: Q4 2025 occupancy by region — Belgium 92%, Netherlands 88%, France 76%" style="display:block;">
+<img src="..." width="600" height="400" alt="Bar chart: Q4 2025 monthly active users by plan tier — Free 12,400, Pro 4,200, Enterprise 280" style="display:block;">
 ```
 
 Rules:

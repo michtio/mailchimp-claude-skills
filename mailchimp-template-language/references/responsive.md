@@ -1,5 +1,19 @@
 # Responsive Email
 
+## Table of contents
+
+1. [The two responsive strategies](#the-two-responsive-strategies)
+2. [Fluid hybrid pattern](#fluid-hybrid-pattern)
+3. [Media-query mobile rules](#media-query-mobile-rules)
+4. [Dark mode](#dark-mode)
+5. [Bulletproof buttons](#bulletproof-buttons)
+6. [Images](#images)
+7. [Font handling](#font-handling)
+8. [Common rendering pitfalls](#common-rendering-pitfalls)
+9. [Testing matrix](#testing-matrix)
+
+---
+
 ## The two responsive strategies
 
 1. **Fluid hybrid** (recommended): tables use percentage widths inside a max-width wrapper. Works in Gmail (which strips `<style>`) without any media queries. Default approach.
@@ -182,15 +196,15 @@ A button that renders correctly in Outlook (which ignores `padding` on `<a>` tag
 ```html
 <table role="presentation" cellpadding="0" cellspacing="0" border="0">
   <tr>
-    <td align="center" bgcolor="#2E114B" style="border-radius:4px; mso-padding-alt:14px 28px;">
+    <td align="center" bgcolor="#3b82f6" style="border-radius:4px; mso-padding-alt:14px 28px;">
       <!--[if mso]>
-      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://example.com" style="height:44px; v-text-anchor:middle; width:200px;" arcsize="10%" stroke="f" fillcolor="#2E114B">
+      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://example.com" style="height:44px; v-text-anchor:middle; width:200px;" arcsize="10%" stroke="f" fillcolor="#3b82f6">
         <w:anchorlock/>
         <center style="color:#ffffff; font-family:Arial,sans-serif; font-size:16px; font-weight:bold;">Click here</center>
       </v:roundrect>
       <![endif]-->
       <!--[if !mso]><!-- -->
-      <a href="https://example.com" style="display:inline-block; padding:14px 28px; font-family:Arial,sans-serif; font-size:16px; font-weight:bold; color:#ffffff; text-decoration:none; border-radius:4px; background-color:#2E114B;">
+      <a href="https://example.com" style="display:inline-block; padding:14px 28px; font-family:Arial,sans-serif; font-size:16px; font-weight:bold; color:#ffffff; text-decoration:none; border-radius:4px; background-color:#3b82f6;">
         Click here
       </a>
       <!--<![endif]-->
