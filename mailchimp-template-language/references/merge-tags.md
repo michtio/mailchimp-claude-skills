@@ -9,10 +9,13 @@ These are compliance-mandated. Omitting them either fails the send or causes Mai
 | Tag | What it produces | Required? |
 |---|---|---|
 | `*|UNSUB|*` | One-click unsubscribe URL | YES — must be in a clickable link |
-| `*|LIST:ADDRESS|*` | Audience's physical mailing address (CAN-SPAM, GDPR) | YES |
-| `*|HTML:LIST:ADDRESS_HTML|*` | Same address, pre-formatted HTML | Alternative to above |
+| `*|LIST:ADDRESS|*` | Audience's physical mailing address, plain text (CAN-SPAM, GDPR) | YES |
+| `*|HTML:LIST_ADDRESS_HTML|*` | Same address, pre-formatted HTML, with "Add us to your address book" vCard link | Alternative to above |
+| `*|LIST:ADDRESSLINE|*` | Address on a single line | Alternative to above |
 | `*|LIST:COMPANY|*` | Audience's organization name | Recommended |
 | `*|CURRENT_YEAR|*` | Current 4-digit year | Recommended (copyright lines) |
+
+**Note the underscore in `*|HTML:LIST_ADDRESS_HTML|*`** — between `LIST` and `ADDRESS`, not a colon. This is how Mailchimp's cheat sheet writes it; the colon form (`HTML:LIST:ADDRESS_HTML`) is widely seen in third-party docs but doesn't match Mailchimp's documentation.
 
 ### Minimal compliant footer
 
@@ -23,7 +26,7 @@ These are compliance-mandated. Omitting them either fails the send or causes Mai
       &copy; *|CURRENT_YEAR|* *|LIST:COMPANY|*. All rights reserved.
     </p>
     <p style="margin:0 0 12px 0;">
-      *|HTML:LIST:ADDRESS_HTML|*
+      *|HTML:LIST_ADDRESS_HTML|*
     </p>
     <p style="margin:0;">
       <a href="*|UNSUB|*" style="color:#888; text-decoration:underline;">Unsubscribe</a>
@@ -44,14 +47,16 @@ These reflect campaign/audience state. Use them, don't redefine them.
 |---|---|
 | `*|MC_PREVIEW_TEXT|*` | The preview text set in campaign settings. **Put this in a hidden div as first body child.** |
 | `*|MC:SUBJECT|*` | Campaign subject line (useful in the `<title>` tag and "view in browser" headers) |
-| `*|MC:DATE|*` | Send date in default format |
-| `*|MC:DATE:m/d/Y|*` | Send date with PHP-style format string |
-| `*|ARCHIVE|*` | URL to the web-archived version of the email |
+| `*|MC:DATE|*` | **Send date** in the account-level locale format (MM/DD/YYYY or DD/MM/YYYY). No format argument. |
+| `*|DATE:X|*` | **Current date** (at render time) with PHP-style format string `X`. E.g. `*|DATE:Y|*`, `*|DATE:F j, Y|*`. Not the send date — see below. |
+| `*|ARCHIVE|*` | URL to the web-archived version of the email. This is also the "view in browser" URL — Mailchimp does not document a separate `*|MC:URL|*` tag despite what some third-party guides suggest. |
 | `*|FORWARD|*` | URL to "forward to a friend" form |
 | `*|UPDATE_PROFILE|*` | URL to subscriber's preferences page |
-| `*|REWARDS|*` | "Powered by Mailchimp" referral link (free plans only) |
-| `*|MC:TOC|*` | Table of contents (legacy, rarely used) |
-| `*|MC:TOC_ANCHOR|*` | Anchor marker for the TOC |
+| `*|REWARDS|*` | Adds Mailchimp's referral badge to the email |
+| `*|MC:TOC|*` | Table of contents — auto-generated from `*|MC:TOC_TEXT|*` markers in the body |
+| `*|MC:TOC_TEXT|*` | Companion marker placed on headings; populates the TOC entry text |
+
+`*|MC:DATE|*` ≠ `*|DATE|*`. The first returns the send date in account locale, no format option. The second returns the current date and accepts a format string. The skill's earlier conflation of these was wrong; use the right tag for the right purpose.
 
 ### Preview text placement
 
@@ -76,26 +81,21 @@ Drawn from audience fields. The tag name matches the **merge field tag** (visibl
 | `*|EMAIL|*` | Email address |
 | `*|PHONE|*` | Phone |
 | `*|ADDRESS|*` | Address |
-| `*|BIRTHDAY|*` | Birthday |
-| `*|MMERGE3|*`, `*|MMERGE4|*`, etc. | Custom fields by index (legacy) |
+| `*|MERGE3|*`, `*|MERGE4|*`, etc. | Custom fields by index |
 
-Custom field tags use whatever was set in audience settings — e.g., `*|COMPANY|*`, `*|JOBTITLE|*`. Check the audience's merge fields before assuming tags exist.
+`*|BIRTHDAY|*` and other named tags work *only* if the audience field was explicitly named `BIRTHDAY` (or whatever) in audience settings. Mailchimp's default custom-field pattern is `*|MERGE1|*`, `*|MERGE2|*`, etc., until you rename them. Some older Mailchimp interfaces and API contexts show `MMERGE` (double M) — check the actual audience configuration before assuming a tag exists.
 
 ### Default values
 
-Always provide a fallback for personalization. `Hi *|FNAME|*` produces `Hi ` when the field is blank — ugly. Use the long form:
+Always provide a fallback for personalization. `Hi *|FNAME|*` produces `Hi ` when the field is blank — ugly. Use the conditional form:
 
 ```
 Hi *|IF:FNAME|**|FNAME|**|ELSE:|*there*|END:IF|*,
 ```
 
-Or the shorter fallback syntax:
+For audience-wide defaults, Mailchimp also supports setting a **default merge value** in audience field settings — anyone without a `FNAME` value sees the default at send time. See https://mailchimp.com/help/set-default-merge-values/ for the configuration path.
 
-```
-Hi *|FNAME|fallback:there|*,
-```
-
-Both produce `Hi <recipient first name>,` for known subscribers and `Hi there,` for unknowns.
+A shorter inline fallback syntax (`*|FNAME|fallback:there|*`) is widely shared in community guides and appears to work in production, but it is **not documented in Mailchimp's current help center**. The `IF/ELSE` form above and the audience-level default are the two documented mechanisms; prefer those if you need certainty.
 
 ## Conditional content
 
@@ -165,8 +165,7 @@ Mailchimp evaluates the entire string inside `*|IF:...|*` literally. There is no
 
 ### Truthy/falsy (when no operator is used)
 
-- Empty string, missing field, or literal `0` → falsy.
-- Any non-empty value → truthy.
+Mailchimp's conditional-blocks doc describes IF in terms of whether the field "has a value": empty / missing → false, present → true. The behavior of edge values like the literal string `0` is not specified in the docs; if the distinction matters for your audience, test it against a real subscriber first.
 
 So `*|IF:DISCOUNT_CODE|*Use code *|DISCOUNT_CODE|* at checkout.*|END:IF|*` shows nothing for subscribers without a discount code.
 
@@ -181,20 +180,15 @@ A conditional must open and close within the same content block (the same `mc:ed
 ## Date and number formatting
 
 ```
-*|DATE:Y|*               4-digit year
+*|DATE:Y|*               4-digit year (current date at render time)
 *|DATE:F j, Y|*          March 22, 2026
 *|DATE:d/m/Y|*           22/03/2026
 *|DATE:Y-m-d|*           2026-03-22
 ```
 
-PHP date format characters. The `*|DATE|*` tag without a format gives the send date in audience-localized format.
+PHP-style date format characters. `*|DATE:X|*` returns the **current date** at render time, formatted by `X`. For the **send date** in the account's locale format, use `*|MC:DATE|*` (no format argument accepted).
 
-For arithmetic on dates:
-
-```
-*|DATE_ADD:+1 week:F j, Y|*    Date one week from send
-*|DATE_ADD:-30 days|*           30 days ago
-```
+Some community guides reference a `*|DATE_ADD:...|*` arithmetic helper for relative dates ("one week from now," "30 days ago"). It is **not documented in Mailchimp's current help center** — if you need date arithmetic, compute the value externally and pass it in as a merge field, or use audience automations that compute relative dates server-side.
 
 ## URL tags
 
@@ -202,10 +196,12 @@ Tags in `href` attributes get expanded too:
 
 ```html
 <a href="https://example.com/?email=*|URL:EMAIL|*">View your account</a>
-<a href="*|MC:URL|*">View in browser</a>
+<a href="*|ARCHIVE|*">View in browser</a>
 ```
 
-`*|URL:TAG|*` URL-encodes the value. Use it for query parameters; without it, special characters break links.
+`*|URL:YOUR_MERGETAG|*` URL-encodes the value. Use it for query parameters; without it, special characters break links.
+
+The "view in browser" / web-archive URL is `*|ARCHIVE|*`. Mailchimp does not document a `*|MC:URL|*` tag, despite the name surfacing in some third-party guides — `*|ARCHIVE|*` is the documented form.
 
 ## Audience and campaign metadata
 
@@ -215,9 +211,10 @@ Tags in `href` attributes get expanded too:
 | `*|LIST:COMPANY|*` | Audience's company name |
 | `*|LIST:DESCRIPTION|*` | Audience description |
 | `*|LIST:SUBSCRIBE|*` | Signup form URL |
-| `*|LIST:UNSUBSCRIBE|*` | Hosted unsubscribe page URL |
-| `*|TRANSLATE:lang|*…*|END:TRANSLATE|*` | **Block tag.** Wraps content for machine translation to the target language. Open + close form required; not a single-tag substitution. |
-| `*|INTERESTS|*` | List of subscriber's interests (group memberships) |
+| `*|TRANSLATE:XX|*` | **Single tag** that inserts a Google Translate link for the campaign archive in language `XX` (e.g. `*|TRANSLATE:fr|*` for French). Not a wrapping block — it does **not** translate inline content. |
+| `*|INTERESTED:GroupTitle:GroupName|*…*|END:INTERESTED|*` | Block conditional. Content between the open/close shows only to subscribers in the named interest group. |
+
+The `*|TRANSLATE|*` tag is often misdescribed as a block tag in third-party guides; Mailchimp's docs make it clear it's a single substitution producing a translate-link URL. For per-language content blocks within a campaign, use `*|IF:MC_LANGUAGE=...|*…*|END:IF|*` or audience groups + conditional blocks (the `INTERESTED` pattern).
 
 ## Tags Mailchimp does NOT support (common mistakes)
 

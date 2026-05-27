@@ -17,19 +17,26 @@ from collections import Counter
 from pathlib import Path
 
 
-# Inline elements where mc:edit is invalid
+# Inline elements where mc:edit is invalid.
+# NOTE: <img> is intentionally absent — Mailchimp's docs explicitly permit
+# mc:edit on <img> ("This will allow the image to be replaced, resized, and
+# edited..."), so we don't flag it here. See VALID_MC_EDIT_PARENTS.
 INLINE_ELEMENTS = {
     "a", "span", "strong", "em", "b", "i", "u", "small", "sub", "sup",
-    "code", "br", "img", "label", "input", "button", "abbr", "cite", "q",
+    "code", "br", "label", "input", "button", "abbr", "cite", "q",
 }
 
-# Elements where mc:edit is valid
-VALID_MC_EDIT_PARENTS = {"td", "div", "th"}
+# Elements where mc:edit is valid.
+# Mailchimp's docs say mc:edit goes on "a div, table cell, or any other
+# element that can be considered a 'container'", plus explicitly on <img>.
+VALID_MC_EDIT_PARENTS = {"td", "div", "th", "img"}
 
 # Required merge tags for compliance
 REQUIRED_TAGS = ["*|UNSUB|*", "*|LIST:ADDRESS|*"]
-# Either UNSUB or HTML:LIST:ADDRESS_HTML covers physical address
-ALT_ADDRESS_TAG = "*|HTML:LIST:ADDRESS_HTML|*"
+# Either *|LIST:ADDRESS|* or *|HTML:LIST_ADDRESS_HTML|* covers physical address.
+# Note the underscore (not colon) between LIST and ADDRESS in the HTML variant —
+# this is the form documented in Mailchimp's merge-tag cheat sheet.
+ALT_ADDRESS_TAG = "*|HTML:LIST_ADDRESS_HTML|*"
 
 
 def strip_inert_regions(html: str) -> str:
@@ -177,12 +184,22 @@ def validate(html: str, strict: bool = False) -> tuple[list[str], list[str]]:
         )
 
     # 4. mc:repeatable placement
+    # Mailchimp's docs name <div> and <p> as primary examples and also
+    # permit inline elements like <img>, <a>, <span>; lists are the only
+    # element family explicitly excluded. In table-based email layouts the
+    # practical unit is <tr> or <table>, so we accept the union.
     repeatables = find_mc_repeatables(scan_html)
     for element, name, line in repeatables:
-        if element not in {"tr", "table", "div"}:
+        if element in {"ul", "ol", "li"}:
             warnings.append(
                 f"line {line}: mc:repeatable='{name}' on <{element}>. "
-                f"Convention: use <tr> or a full <table> as the repeatable unit."
+                f"Mailchimp's docs exclude list elements from mc:repeatable."
+            )
+        elif element not in {"tr", "table", "div", "p", "img", "a", "span"}:
+            warnings.append(
+                f"line {line}: mc:repeatable='{name}' on <{element}>. "
+                f"Convention for table-based email: <tr> or a full <table>. "
+                f"Mailchimp also accepts <div>, <p>, and certain inline elements."
             )
 
     # 5. Required merge tags
@@ -202,7 +219,10 @@ def validate(html: str, strict: bool = False) -> tuple[list[str], list[str]]:
 
     # 7. Doctype check
     if not re.search(r"<!DOCTYPE\s+html", html, re.IGNORECASE):
-        warnings.append("no DOCTYPE declaration. Add HTML 4.01 Transitional or HTML5 doctype.")
+        warnings.append(
+            "no DOCTYPE declaration. Use XHTML 1.0 Transitional (matches the "
+            "bundled skeleton) or HTML5. Without one, Outlook drops to quirks mode."
+        )
 
     # 8. Images without dimensions
     img_tags = re.findall(r"<img\s+[^>]*>", html, re.IGNORECASE)

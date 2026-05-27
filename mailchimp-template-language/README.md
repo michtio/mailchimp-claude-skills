@@ -53,7 +53,7 @@ mailchimp-template-language/
 │   ├── patterns.md                # Brand-neutral content blocks (section openers, cards, footers, etc.)
 │   ├── typography.md              # Token-slot system, type scale, web-font loading
 │   ├── blueprints.md              # Structural archetypes: newsletter, promo, transactional, announcement, re-engagement
-│   ├── accessibility.md           # WCAG AA contrast, alt text, lang, role=presentation, semantic order
+│   ├── accessibility.md           # WCAG 2.2 AA contrast & target size, alt text, lang, role=presentation, semantic order
 │   └── inliner.md                 # CSS inlining workflow (Juice/Premailer), what survives Gmail web
 ├── assets/
 │   └── skeleton.html              # Working starter: 600px responsive, all MCTL features wired, brand-neutral
@@ -87,15 +87,15 @@ python3 mailchimp-template-language/scripts/validate.py path/to/template.html --
 Exit codes: 0 clean, 1 issues found, 2 file not found. Safe in CI pipelines.
 
 What it catches:
-- `mc:edit` on inline elements (span, a, strong, etc.)
+- `mc:edit` on text-level inline elements (`<span>`, `<a>`, `<strong>`, etc.) — `<img>` is intentionally excluded, since Mailchimp's docs explicitly permit `mc:edit` on `<img>`
 - `mc:edit` on `<table>` itself
 - Duplicate `mc:edit` names
 - Nested `mc:edit` regions
-- Missing required compliance tags (`*|UNSUB|*`, `*|LIST:ADDRESS|*`)
+- Missing required compliance tags (`*|UNSUB|*`, plus `*|LIST:ADDRESS|*` or `*|HTML:LIST_ADDRESS_HTML|*`)
 - Missing preview text tag
-- `<img>` without width/height attributes
+- `<img>` without `width`/`height` attributes
 - Missing doctype or viewport meta
-- HTML over Gmail's 102 KB clipping threshold
+- HTML over Gmail's ~102 KB web clipping threshold (mobile clients sometimes clip lower)
 
 What it doesn't catch:
 - Visual rendering bugs (use Litmus/EoA)

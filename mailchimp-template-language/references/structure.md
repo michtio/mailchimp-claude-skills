@@ -4,21 +4,25 @@ The non-negotiable scaffold for any responsive email. Email clients are 1998-era
 
 ## Doctype and root
 
-Use **XHTML 1.0 Transitional**. Mailchimp doesn't mandate a doctype (their import runs the HTML through the W3C validator, but accepts any valid HTML), so the choice is driven by client compatibility. XHTML 1.0 Transitional is the industry consensus for email because Outlook desktop (Word rendering engine) renders it most predictably. HTML5 works in modern clients but introduces subtle layout differences in Outlook 2007–2019.
+Two doctypes are defensible for email in 2026:
+
+1. **HTML5** (`<!DOCTYPE html>`) — current recommendation from Email on Acid, Litmus, and most modern email-dev guides. Gmail rewrites whatever doctype you send to HTML5 anyway. The only Outlook-related risk is *quirks mode* (no doctype at all), which adds ~8% line-height — both HTML5 and XHTML 1.0 Transitional avoid this equally.
+2. **XHTML 1.0 Transitional** (`<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">`) — older industry default; still widely used and well-supported. The bundled `skeleton.html` uses this form for compatibility with templates the user may already have in production.
+
+Pick one and stay consistent; don't mix doctypes across a template family. The bundled skeleton uses XHTML 1.0 Transitional purely for continuity — feel free to switch to HTML5 if you're starting fresh.
 
 ```html
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
 ```
 
-The `v:` and `o:` namespaces are required for VML (Outlook-only bulletproof buttons and background images).
+The `v:` and `o:` namespaces are only needed if the template includes VML (Outlook-only bulletproof buttons or background images). Templates that ship neither can omit them — they're not harmful but they're not free either; the namespace declarations add bytes and visual noise to every diff.
 
 ## `<head>` block
 
 ```html
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="x-apple-disable-message-reformatting">
   <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
@@ -44,7 +48,7 @@ The `v:` and `o:` namespaces are required for VML (Outlook-only bulletproof butt
     /* CLIENT-SPECIFIC RESETS */
     body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
     table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse; }
-    img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; display: block; }
+    img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; display: block; }
     a { text-decoration: none; }
 
     /* MOBILE STYLES - applied by clients that respect <style> */
@@ -68,10 +72,12 @@ The `v:` and `o:` namespaces are required for VML (Outlook-only bulletproof butt
 ```
 
 Notes:
-- `x-apple-disable-message-reformatting` prevents iOS from auto-zooming small text.
+- `x-apple-disable-message-reformatting` disables Apple iOS Mail's auto-scaling of non-responsive emails (a feature introduced in iOS 10/11 that renders some emails at half-width and zoomed-out). It has nothing to do with text-size auto-zoom.
 - `format-detection` stops iOS from linkifying phone numbers and addresses, which then get blue-underlined and look broken on dark backgrounds.
-- `mso-table-lspace/rspace: 0pt` removes Outlook's mystery table spacing.
-- The MSO conditional inside `<head>` forces Arial in Outlook (web fonts don't load there) and tells Outlook to render at 96dpi instead of 120dpi.
+- `mso-table-lspace/rspace: 0pt` removes the space Outlook (Word engine) adds around tables that float — that is, tables with `align="left"` or `align="right"`. The properties behave like horizontal margins on floated tables; they don't fix every kind of Outlook table spacing, but they handle the floated-table case cleanly.
+- The MSO conditional inside `<head>` forces Arial in Outlook (web fonts don't load there) and tells Outlook to render at 96dpi instead of 120dpi (a Windows HiDPI rendering quirk that affects Outlook 2007–2019 on the Word engine). The `<noscript>` wrapper hides the XML block from clients like T-Online that would otherwise render it as visible text.
+- `X-UA-Compatible` (the `IE=edge` meta) was historically included for old Internet Explorer; it has been obsolete since IE retirement in 2022. Omit it from new templates.
+- `-ms-interpolation-mode: bicubic` is an IE7-era CSS property for image scaling. It does nothing in modern clients (and IE is retired). Omit it from new templates.
 
 ## The body skeleton
 
@@ -148,4 +154,4 @@ Outlook ignores `line-height` on block elements unless this rule is set. Without
 
 ## Why `cellpadding="0" cellspacing="0" border="0"` on every table
 
-Outlook web (the Microsoft 365 webmail) injects default cellpadding/cellspacing/border on tables that omit these attributes. Always set them explicitly, even when you think they're redundant.
+Several Outlook surfaces — particularly OWA / "New Outlook" web — apply default vertical spacing between table cells when these attributes are missing, and at least one Microsoft 365 client is documented to strip `cellspacing="0"` from outbound HTML, producing inconsistent rendering. Setting the three attributes explicitly is cheap insurance: HTML table defaults are reliably zero everywhere, and you avoid relying on each client's reset behaviour.

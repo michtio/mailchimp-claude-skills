@@ -1,6 +1,6 @@
 # Accessibility
 
-WCAG 2.1 AA targets and the email-specific quirks that change how to meet them. Most professional clients now require AA compliance for marketing email — this is no longer optional.
+WCAG 2.2 AA targets and the email-specific quirks that change how to meet them. Most professional clients now require AA compliance for marketing email — this is no longer optional. WCAG 2.2 is the current published version (October 2023); it adds nine new success criteria on top of 2.1 — most relevant to email is **2.5.8 Target Size (Minimum)** at 24×24 CSS px AA.
 
 ## Contrast
 
@@ -42,7 +42,7 @@ Hero patterns, decorative dividers, background flourishes, repeated brand orname
 <img src="..." width="600" height="200" alt="" style="display:block;">
 ```
 
-The empty `alt=""` tells screen readers "skip this." Better than no alt at all (which makes screen readers read the filename) and better than a fake description ("decorative image").
+The empty `alt=""` tells screen readers "skip this." Use it for purely decorative images. (Some older guidance claims that omitting `alt` entirely makes screen readers read the filename — this is only reliably true when the image sits inside an `<a>` with no other link text. For free-standing images, modern screen readers typically skip an image with no `alt` rather than announce a filename. Either way, an explicit `alt=""` is the unambiguous signal.)
 
 ### Informative — describe the content
 
@@ -94,7 +94,7 @@ This flips the layout direction at the HTML level. RTL email layouts also need m
 
 ### Heading order
 
-`<h1>` once per email (the hero headline). Then `<h2>`, `<h3>` in document order. Don't skip levels (`<h1>` → `<h3>` with no `<h2>`) — screen readers use heading nav to skim.
+Convention for email: a single `<h1>` at the top (the hero headline), then `<h2>`, `<h3>` in document order, no skipped levels. HTML5 technically permits multiple `<h1>`s, and WCAG itself doesn't mandate exactly one — but screen reader users navigate by heading list, and a consistent rank progression makes that navigation work. Skipping levels (`<h1>` → `<h3>` with no `<h2>`) is a structural smell flagged by H42/H69 advisory techniques and most accessibility linters.
 
 ```html
 <h1>Issue 27 — May 2026</h1>          <!-- hero, once -->
@@ -108,13 +108,15 @@ Don't use heading tags for visual styling. A "looks like a heading but isn't str
 
 ### `role="presentation"` on layout tables
 
-Every layout table in an email uses tables for visual structure, not data. Mark them so screen readers don't announce them as data tables:
+Every layout table in an email uses tables for visual structure, not data. Mark them so screen readers don't announce table semantics for them:
 
 ```html
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
 ```
 
-Without `role="presentation"`, JAWS / NVDA / VoiceOver read "Table with 1 row, 3 columns" for every layout table — exhausting on a multi-section newsletter.
+Without `role="presentation"`, screen readers announce the table's structure ("table, 1 row, 3 columns" or similar — exact phrasing varies by screen reader and verbosity setting). On a multi-section newsletter that adds up to a lot of friction; on a layout-only table it's pure noise.
+
+`role="none"` is the modern synonym of `role="presentation"` per the ARIA spec — both produce the same result. Either is fine.
 
 **Exception**: actual data tables (line items in a receipt, comparison grids) should NOT have `role="presentation"` — they ARE data and the table semantics help.
 
@@ -141,7 +143,7 @@ For "Read more →" patterns where the link target is implied by surrounding con
 <a href="..." aria-label="Read more about Aalst">Read more &rarr;</a>
 ```
 
-Most email clients respect `aria-label`; the screen reader hears the full label, sighted users see the short text.
+`aria-label` support across email clients is **partial** — around 60% per caniemail.com's latest tracking, with Outlook desktop notably patchy and some webmail clients stripping ARIA attributes entirely. Treat `aria-label` as an enhancement, not a guarantee: pair it with link text that already makes sense in context wherever you can, so the link works even when ARIA is stripped.
 
 ## Color is not the only signal
 
@@ -162,7 +164,7 @@ Colorblind recipients miss the green-vs-red distinction; the second signal carri
 
 ## Touch targets
 
-On mobile, tap targets should be **at least 44×44px** (Apple HIG / WCAG 2.5.5 AAA recommendation; AA target is 24×24px minimum).
+On mobile, tap targets should be **at least 24×24 CSS pixels** (WCAG 2.2 SC 2.5.8 Target Size (Minimum), AA — new in WCAG 2.2). Aim higher where you can: WCAG 2.1's SC 2.5.5 (still AAA, unchanged in 2.2) recommends 44×44 CSS pixels, which also matches Apple's Human Interface Guidelines (44×44 pt) and Google's Material guidelines (48×48 dp). The 24-pixel floor is the new minimum bar; 44 is the comfort bar.
 
 ```css
 @media screen and (max-width: 600px) {

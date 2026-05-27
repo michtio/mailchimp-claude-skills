@@ -1,6 +1,6 @@
 # mailchimp-claude-skills
 
-> Anthropic Agent Skills for authoring [Mailchimp](https://mailchimp.com/) email templates from [Claude Code](https://docs.anthropic.com/en/docs/claude-code), Claude.ai, or the Anthropic API. The skills handle the boring-but-critical correctness layer — MCTL placement, responsive tables, Outlook hardening, accessibility, compliance — so prompts can focus on brand, design, and structure.
+> [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skills for authoring custom-coded [Mailchimp](https://mailchimp.com/) email templates. The skill handles the correctness layer — MCTL placement, responsive tables, Outlook hardening, accessibility, compliance — so your prompt can focus on brand, content, and structure.
 
 Built and maintained by [michtio](https://github.com/michtio) at [Bleu Chaud](https://bleuchaud.com).
 
@@ -11,113 +11,166 @@ If this project saves you time, consider supporting its development:
 - [GitHub Sponsors](https://github.com/sponsors/michtio)
 - [Buy Me a Coffee](https://buymeacoffee.com/michtio)
 
-## Skills
+## Quick Start
 
-| Skill | What it does |
-|---|---|
-| [`mailchimp-template-language`](./mailchimp-template-language/) | Author and edit custom-coded responsive Mailchimp templates with full MCTL support (`mc:edit`, `mc:repeatable`, `mc:variant`, `mc:hideable`, merge tags, conditionals). Brand-neutral; includes Outlook-hardened skeleton, structural pattern library, and pre-upload validator. |
-
-## How to use
-
-### The pattern
-
-Tell Claude what you want, including the brand inputs. The skill provides the correctness floor — responsive design, semantic HTML, accessibility, Outlook compatibility, valid MCTL — automatically. Your prompt decides the rest.
-
-A productive prompt covers four things:
-
-1. **What kind of email** — newsletter, promotional, transactional, announcement, or re-engagement. The skill maps these to structural blueprints with sensible defaults for sections, repeatable blocks, and hideable elements.
-2. **Brand basics** — name, audience, language(s), tone.
-3. **Visual direction** — colors (foreground, muted, accent, on-accent, background, optional subtle/footer bg, divider), fonts (heading + body with system fallbacks), type scale if you have one.
-4. **Structure and features** — sections in order, which should be repeatable (editor adds/removes/reorders per send), which should be hideable (editor toggles on/off), what merge tags or conditionals are needed.
-
-### Worked example
-
-A prompt like this produces a complete, validator-clean template:
-
-> Build a Mailchimp newsletter template for **Acme Logistics**, a Belgian/Dutch logistics company sending a monthly availabilities update. Audience reads NL, FR, and EN — set `lang="nl-BE"` on this version, we'll fork for FR/EN separately.
->
-> **Palette:**
-> - foreground `#1a1d2e`
-> - muted `#6b6e7a`
-> - accent `#2563eb`
-> - on-accent `#ffffff`
-> - background `#ffffff`
-> - subtle-bg `#f5f6f8`
-> - divider `#e3e5ea`
->
-> **Type:** Headings in **Manrope** (weights 300, 500, 700) via Google Fonts with Arial fallback. Body in **Inter** (400, 600) with Arial fallback. Scale: display 36/40, h1 28/34, h2 22/28, body 15/24, meta 12/18, micro 10/15 uppercase tracked 0.15em.
->
-> **Structure:**
-> 1. Preheader with current month / issue number
-> 2. Top nav: logo + language switcher (EN · NL · FR)
-> 3. Hero: eyebrow ("May 2026 — Issue 27") + headline + subhead + primary CTA + hero image
-> 4. **Repeatable country sections**, each containing: country name + unit count + 3 card slots (image, eyebrow, title, sqm, specs, CTA) + 1 hideable "coming soon" filler slot + per-country contact blurb
-> 5. **Hideable sustainability section** (eyebrow, image, headline, body, CTA)
-> 6. **Hideable market signal section** containing **repeatable signal blocks** (eyebrow + body each)
-> 7. **Repeatable contact blocks** in a "Get in touch" footer area
-> 8. Compliance footer with address, unsubscribe, update prefs, copyright
->
-> Validate the output before declaring done.
-
-What the skill brings to that prompt — without you having to ask:
-
-- Responsive design via fluid hybrid + `@media (max-width: 600px)` rules
-- `@media (prefers-color-scheme: dark)` dark-mode swaps
-- `role="presentation"` on every layout table
-- `lang="nl-BE"` on `<html>`, `mso-line-height-rule:exactly` on `<body>`
-- MSO conditionals forcing Arial in Outlook, 96 DPI rendering, VML buttons
-- `*|UNSUB|*`, `*|LIST:ADDRESS|*` (or `*|HTML:LIST:ADDRESS_HTML|*`), `*|MC_PREVIEW_TEXT|*` correctly placed
-- Every `mc:edit` on a `<td>` or `<div>` (never on `<img>`, `<a>`, `<span>` — the #1 cause of silent Mailchimp import failures)
-- Unique `mc:edit` names; conventional names where applicable (so the template survives Switch Template)
-- Every `<img>` with `width`, `height`, `alt`, `display:block`
-- WCAG AA contrast checked against the palette you provide
-- HTML size under Gmail's 102 KB clipping threshold
-- Final pass through `scripts/validate.py` — output is upload-ready
-
-### Iterating
-
-Treat the first generation as a draft. Conversational follow-ups work:
-
-- *"Swap the accent to `#7c3aed` and verify contrast on the CTA."*
-- *"Add a 'Featured property' section between hero and country sections — single card, hideable."*
-- *"The hero image is too tall on mobile — reduce its rendered height to 200px below 600px wide."*
-- *"Add a French-language version: copy the file, change `lang` to `fr-BE`, translate the hero eyebrow and CTA labels, keep everything else identical."*
-- *"This is missing alt text on the map image — fix it."*
-
-### What you don't need to provide
-
-The skill handles these without prompting:
-
-- The doctype, head block, MSO conditionals, viewport meta
-- The three-table responsive scaffold
-- Default CSS resets for Outlook / Apple Mail / Gmail
-- Bulletproof button structure (VML + non-MSO branches)
-- Multi-column footer with dark-mode-friendly styling
-- Compliance footer structure (you provide the address; the merge tags are automatic)
-
-## Installation
-
-### Claude Code Plugin (recommended)
+### 1. Install
 
 ```bash
+# Claude Code Plugin (recommended)
 # First time: add the marketplace, then install
 /plugin marketplace add michtio/mailchimp-claude-skills
 /plugin install mailchimp-claude-skills@michtio/mailchimp-claude-skills
-```
 
-### Clone and run `install.sh`
-
-```bash
+# Or clone manually
 git clone https://github.com/michtio/mailchimp-claude-skills.git ~/.claude/mailchimp-claude-skills
 cd ~/.claude/mailchimp-claude-skills && bash install.sh
 ```
 
-`install.sh` symlinks every skill in this repo (any directory containing a `SKILL.md`) into `~/.claude/skills/`, so updates flow through automatically when you `git pull`. Run `bash uninstall.sh` to remove the symlinks. Manually-installed skills are never touched.
+`install.sh` symlinks every skill (any directory containing a `SKILL.md`) into `~/.claude/skills/`, so updates flow through with `git pull`. `bash uninstall.sh` removes the symlinks; manually-installed skills are never touched.
+
+For Claude.ai or the Anthropic API, see [Installation methods](#installation-methods) below.
+
+### 2. Describe Your Template
+
+Open Claude Code in any working directory and describe what you need. Skills trigger automatically based on the prompt.
+
+```
+Build a Mailchimp newsletter template for Acme Logistics, monthly availabilities
+update. Palette: foreground #1a1d2e, accent #2563eb, white background. Headings
+in Manrope, body in Inter, both with Arial fallback. Sections: hero, repeatable
+country blocks with 3 cards each, hideable sustainability section, footer with
+address and unsubscribe. Validate before declaring done.
+```
+
+The skill loads its responsive scaffold, fills the brand inputs, places MCTL attributes correctly, hooks up compliance tags, and runs the validator.
+
+### 3. Validate & Ship
+
+```bash
+# Validate locally before uploading
+python3 mailchimp-template-language/scripts/validate.py template.html
+
+# Exit 0 = clean, 1 = errors found, 2 = file not found
+# Use --strict to fail on warnings too (CI-friendly)
+```
+
+Then paste into Mailchimp's "Code your own → Paste in code" flow, or upload programmatically via a [Mailchimp MCP server](#composition).
+
+## Example Prompts
+
+Just describe what you need. The skill triggers on Mailchimp / MCTL / merge-tag mentions and produces validator-clean templates.
+
+```
+Build a Mailchimp template for our quarterly product update. Single hero with
+big number ("Q2 in numbers"), three stat cards (active users, exports
+processed, new integrations), then a repeatable feature-highlights section,
+then a compliance footer. WCAG 2.2 AA. Inter via Google Fonts with Arial
+fallback.
+```
+
+```
+Convert this static HTML email into a Mailchimp-editable template. Mark the
+header, body, and footer as mc:edit regions. Add a repeatable card row.
+The "Featured" callout should be hideable. Keep the existing styling.
+```
+
+```
+Add a French-language version of this template. Copy the file, set lang to
+fr-BE, translate the hero eyebrow and CTA labels, keep everything else
+identical. The compliance footer copy needs to be French too.
+```
+
+```
+Our current Mailchimp templates don't share mc:edit names so editors lose
+content when switching templates. Audit these three templates and normalize
+the editable region names so Switch Template works cleanly across them.
+```
+
+```
+A subscriber reported that our last campaign's hero image is missing alt text
+and the unsubscribe link is hard to find on mobile. Audit our base template
+for accessibility issues — WCAG 2.2 AA — and fix what you find.
+```
+
+```
+Build a re-engagement campaign template. Empathetic opener, three highlights
+of what they've missed (hideable), a clear reactivation CTA, plus an explicit
+soft-exit unsubscribe section with positive framing. Editorial type, no
+hype.
+```
+
+## What's Inside
+
+### Skills
+
+| Skill | What it does |
+|-------|--------------|
+| `mailchimp-template-language` | Authors custom-coded responsive MCTL templates with full `mc:edit` / `mc:repeatable` / `mc:variant` / `mc:hideable` support, merge tags, conditional blocks, Outlook hardening, accessibility, and CSS inlining workflow. 9 reference files. |
+| `mailchimp-multilingual` | Plans and builds multilingual campaigns — `MC_LANGUAGE` field, `IF:MC_LANGUAGE=xx` conditional content, segments-vs-conditional decision tree, multi-market template forking. Companion-loads the template-language skill for the underlying HTML. 4 reference files. |
+
+### Agents
+
+| Agent | Model | Purpose |
+|-------|-------|---------|
+| `mailchimp-template-reviewer` | Sonnet | Read-only qualitative review companion to `validate.py`. Catches what the structural validator can't: accessibility content quality (alt text content, link text, palette contrast pairs), cross-client risk patterns (VML correctness, `mso-padding-alt` scoping, dark-mode mitigation), multilingual completeness (parallel branches, `lang` attrs, localized compliance footer), brand consistency, regional compliance (CAN-SPAM / GDPR / CASL / LGPD / etc.). Reports findings by severity; doesn't edit. |
+| `mailchimp-template-builder` | Opus | Builds templates feature by feature with layered build-verify gates (scaffold → hero → body → CTA → footer → final validator pass). Earns its keep on multi-template parallel orchestration — `"build NL/FR/DE/EN versions, mirrored structure"` — where structural parity across files matters. Mandatory todo list for plans over 3 steps. |
+
+Agents compose: the builder produces, the reviewer audits, the structural validator gates. See [agents/](./agents/) for the full agent definitions.
+
+### Reference files
+
+Both skills use on-demand loading. The `SKILL.md` body stays small; Claude pulls in the relevant reference when the conversation needs it.
+
+**`mailchimp-template-language/references/`** (9 files)
+
+| Reference | Covers |
+|-----------|--------|
+| `structure.md` | Doctype guidance, head block, MSO conditionals, three-table body skeleton |
+| `mc-attributes.md` | `mc:edit` / `mc:repeatable` / `mc:variant` / `mc:hideable` placement rules and conventional names |
+| `merge-tags.md` | Merge-tag syntax (`*\|TAG\|*`), IF/ELSEIF/ELSE/IFNOT conditionals, comparison operators, required compliance tags, escape patterns |
+| `responsive.md` | Fluid hybrid layout, media-query mobile rules, dark mode per client, bulletproof buttons, retina images, web-font loading |
+| `typography.md` | Color and font token vocabulary, type scale by role, line-height ratios, multi-script coverage, web-font MSO pattern |
+| `patterns.md` | 10 brand-neutral structural patterns: section openers, repeatable cards, multi-column footer, contact blocks, image-text rows, pull quotes, stats, dividers, button variants, feature lists |
+| `blueprints.md` | 5 archetype blueprints: newsletter, promotional, transactional, announcement, re-engagement — section order, `mc:edit` taxonomy, repeatable/hideable map |
+| `accessibility.md` | WCAG 2.2 AA targets (contrast, target size minimum), alt text, lang, semantic order, `role="presentation"`, link text, touch targets, RTL |
+| `inliner.md` | When to pre-inline with Juice or Premailer vs rely on Mailchimp's opt-in inliner, what survives Gmail web, common pitfalls |
+
+**`mailchimp-multilingual/references/`** (4 files)
+
+| Reference | Covers |
+|-----------|--------|
+| `language-detection.md` | `MC_LANGUAGE` + `MC_LANGUAGE_LABEL`, capture paths (browser auto-detect, signup field, CSV, API), full accepted ISO code list, locale-variant gotchas (`de_CH` / `it_CH` / `rm` / `zh_Hant` collapses), `"Not yet detected"` default |
+| `conditional-content.md` | `*\|IF:MC_LANGUAGE=xx\|*` patterns, per-language hero / CTA / preheader / compliance footer, worked examples for Belgian / Swiss / Canadian / Singaporean audiences |
+| `segments-vs-conditional.md` | Decision tree across Mailchimp's three documented multilingual paths (segments + separate campaigns, single conditional campaign, `*\|TRANSLATE:xx\|*` link), tradeoff matrix, per-region defaults |
+| `multi-market.md` | Multi-market-global-brand orientation: account topology choices, master + fork workflow, per-market regulatory footers (BE/FR/DE/UK/CA/BR/AU specifics), sync strategies, scope boundary |
+
+### Assets and scripts
+
+| Path | What it is |
+|------|------------|
+| `assets/skeleton.html` | Working brand-neutral starter: XHTML 1.0 Transitional doctype, full MSO conditionals, three-table responsive scaffold, dark-mode media query, bulletproof button (VML + non-MSO), repeatable card grid with hideable promo row, compliance-correct footer |
+| `scripts/validate.py` | Pre-upload validator (Python 3.10+, stdlib only) — catches structural mistakes that silently break Mailchimp imports. Exits 0 clean / 1 issues / 2 file not found |
+
+## Composition
+
+This skill is the **authoring** layer. Pair it with:
+
+- [`damientilman/mailchimp-mcp-server`](https://github.com/damientilman/mailchimp-mcp-server) — 112 tools across the Mailchimp Marketing API (campaigns, audiences, reports, segments, automations, e-commerce). Read-only and dry-run modes. `uvx mailchimp-mcp-server`.
+- [Composio's hosted Mailchimp MCP](https://mcp.composio.dev/mailchimp) — OAuth alternative if you don't want to manage API keys.
+- [Litmus](https://litmus.com/) / [Email on Acid](https://www.emailonacid.com/) — cross-client render testing. The skill cannot test rendering; these can.
+
+End-to-end: Claude writes `template.html` → `validate.py` passes → Mailchimp MCP uploads via `/3.0/templates` → Litmus or Email on Acid confirms rendering → send.
+
+## Installation methods
+
+### Claude Code Plugin (recommended)
+
+See [Quick Start step 1](#1-install) above.
 
 ### Manual copy / symlink
 
 ```bash
-# Copy into personal scope
+# Personal scope (all your projects)
 cp -r mailchimp-template-language ~/.claude/skills/
 
 # Or symlink during development
@@ -137,54 +190,26 @@ Zip the `mailchimp-template-language/` folder (the folder itself, with `SKILL.md
 
 See [Anthropic's skill docs](https://docs.claude.com/en/docs/agents/skills) for the current API shape.
 
-## From Claude output to a sent campaign
+## Requirements
 
-Each generated template goes through this flow:
-
-1. **Claude generates `template.html`** using the skill.
-2. **Validate locally**: `python3 mailchimp-template-language/scripts/validate.py template.html`
-   - Exit 0 = clean. Exit 1 = errors found. Use `--strict` to fail on warnings too (good for CI).
-3. **(Optional) Inline CSS**: `juice template.html template.inlined.html --preserve-media-queries --preserve-pseudos --preserve-important`
-   - Skip unless you have specific reasons (see `references/inliner.md`); Mailchimp's built-in inliner handles most cases.
-4. **Upload to Mailchimp**:
-   - Manual: Templates → Create Template → Code your own → Paste in code.
-   - Programmatic: use a Mailchimp MCP server (see [Composition](#composition) below) to `POST /3.0/templates`.
-5. **Preview rendering**: Mailchimp's built-in Inbox Preview (paid plans), Litmus, or Email on Acid before sending.
-6. **Send test**: always send a test to a real inbox and a screen reader before launching a campaign.
-
-## Composition
-
-The skill is the **authoring** layer. Pair with these for **deployment** and **rendering verification**:
-
-- [`damientilman/mailchimp-mcp-server`](https://github.com/damientilman/mailchimp-mcp-server) — 112 tools across the Mailchimp Marketing API (campaigns, audiences, reports, segments, automations, e-commerce). Read-only and dry-run safety modes. Install via `uvx mailchimp-mcp-server`.
-- [Composio's hosted Mailchimp MCP](https://mcp.composio.dev/mailchimp) — OAuth alternative if you don't want to manage API keys.
-- [Litmus](https://litmus.com/) / [Email on Acid](https://www.emailonacid.com/) — cross-client render testing. The skill cannot test rendering itself; these can.
-
-End-to-end: Claude writes `template.html` → `validate.py` passes → Mailchimp MCP uploads via `/3.0/templates` → Litmus/EoA confirms rendering → send.
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code), Claude.ai with Skills, or Anthropic API access
+- Python 3.10+ for the validator (stdlib only — no installs)
+- A Mailchimp account if you intend to upload and send the result
 
 ## Why this repo exists
 
 Across the public Anthropic Skills ecosystem (anthropics/skills, obra/superpowers, wshobson/agents, ComposioHQ/awesome-claude-skills, and other catalogs), as of mid-2026 no skill targets Mailchimp's template language directly. Existing "Mailchimp" skills are uniformly API/MCP wrappers operating on existing templates — none help Claude *author* a custom-coded MCTL template that doesn't silently break on import.
 
-This repo fills the gap with hand-authored MCTL tooling tuned to Mailchimp's quirks. Templates produced via prompting + this skill pass the validator, render across the major email clients, and are accessible by default — which means brand and content become the only things you need to think about per project.
+This repo fills the gap. Templates produced via prompting + this skill pass the validator, target the major email clients, and meet WCAG 2.2 AA when the brand palette is supplied — which means brand and content become the only things to think about per project.
 
 ## Roadmap
 
-Likely future skills (built when real client demand drives them):
+- [ ] **`mailchimp-rss-driven`** — Templates wired for Mailchimp's RSS-to-email automations. Covers the documented merge tags: `*|RSSFEED:TITLE|*` / `*|RSSFEED:DATE|*` / `*|RSSFEED:URL|*` / `*|RSSFEED:DESCRIPTION|*` for channel-level, `*|RSSITEM:TITLE|*` / `:URL|*` / `:DATE|*` / `:AUTHOR|*` / `:CONTENT|*` / `:CONTENT_FULL|*` / `:IMAGE|*` for per-item, plus the `*|RSSITEMS:|*…*|END:RSSITEMS|*` loop block.
 
-- `mailchimp-multilingual` — Campaign-level patterns for sending in multiple languages. Two distinct shapes:
-  - **Single list, multiple languages** (one audience, members speak different languages): `*|TRANSLATE|*`, audience groups, conditional content blocks. Common in countries with multiple official languages — Switzerland (DE/FR/IT/RM), Belgium (NL/FR/DE), Canada (EN/FR), Singapore (EN/ZH/MS/TA).
-  - **Global brand, multiple markets** (separate audiences per market, often separate Mailchimp accounts or sub-accounts): template syndication / forking workflow, per-market regional adaptations (currency, regulations, product lineup, brand voice), multi-account orchestration. Common in international consumer brands.
+- [ ] **`mailchimp-transactional-handlebars`** — Separate skill for Mandrill / Mailchimp Transactional. Different syntax (Handlebars by default; MCTL configurable per account), different sending model, different deliverability concerns. Not interchangeable with the marketing-campaign skill.
 
-  Template-level concerns (`lang` attribute, character coverage, per-script font stacks, RTL handling) are already handled by `mailchimp-template-language` for both shapes — what this skill adds is the audience and campaign orchestration on top.
-- `mailchimp-rss-driven` — Templates wired for Mailchimp's RSS-to-email automations, with `*|RSSITEM|*` patterns.
-- `mailchimp-product-feed` — E-commerce templates with product-grid merge tags for Shopify/WooCommerce integrations.
-- `mailchimp-transactional-handlebars` — Separate skill for Mandrill/Transactional (different syntax: Handlebars, not MCTL).
+- [ ] **`mailchimp-ecommerce`** *(scope under investigation)* — Mailchimp's product data integrates via the e-commerce content blocks in the new/legacy builder, not via documented merge tags. A skill here would likely focus on either (a) hand-coded product cards populated from custom merge fields synced via the Marketing API, or (b) a pattern library for the e-commerce content blocks. Whether this is a meaningful authoring surface, or whether the block editor already handles it well enough, depends on real client demand — flagged as exploratory rather than committed.
 
 ## License
 
 MIT — see [LICENSE](./LICENSE).
-
-## Author
-
-Built by [michtio](https://github.com/michtio) at [Bleu Chaud](https://bleuchaud.com).

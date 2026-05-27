@@ -101,7 +101,15 @@ Body and meta use `letter-spacing: 0` (default).
 
 ## Web font loading
 
-Outlook desktop (Word rendering engine) does not load `@import`-ed web fonts. Apple Mail, iOS Mail, Gmail web (sometimes), and modern Outlook 365 webmail do.
+Web-font support in 2026 is patchier than it looks. Treat the following as the working model:
+
+- **Apple Mail (macOS, iOS), Outlook for Mac** — load reliably.
+- **Outlook 365 web** — loads for some corporate Exchange / M365 accounts; drops `@font-face` for Microsoft mailbox accounts (`outlook.com`, `live.com`, `hotmail.com`).
+- **Gmail web** — does **not** load arbitrary `@import` web fonts. The renderer has Roboto and Google Sans preloaded; everything else falls through to the stack.
+- **Classic Outlook for Windows (Word engine)** — never loads `@font-face`.
+- **Gmail mobile apps** — inconsistent; do not rely on web fonts.
+
+Always design assuming the fallback stack will render — web fonts are an enhancement.
 
 ### The MSO-conditional pattern
 
@@ -126,7 +134,7 @@ Outlook desktop (Word rendering engine) does not load `@import`-ed web fonts. Ap
 </head>
 ```
 
-Inside the conditional we use `<link>` *and* `<style>@import` — some clients respect one, some the other. Belt and braces.
+Inside the conditional we use `<link>` *and* `<style>@import` for defensive reasons: some clients sanitize `<link>` in `<head>` while still honouring `@import`, and a few historic clients did the reverse. Litmus and Email on Acid both recommend `<link>` as the primary form with `@import` as a fallback for sanitized-`<link>` clients.
 
 ### Mandatory fallback stack
 
@@ -144,32 +152,37 @@ If the web font fails to load (Outlook always, Gmail sometimes), the system font
 
 When you want a non-default look but can't rely on web fonts in critical regions:
 
-| Style | System stack |
-|---|---|
-| Modern sans | `Verdana, Geneva, sans-serif` (highly legible at small sizes) |
-| Geometric sans | `'Trebuchet MS', sans-serif` |
-| Humanist sans | `Tahoma, sans-serif` |
-| Serif | `Georgia, 'Times New Roman', serif` |
-| Modern serif | `'Palatino Linotype', Palatino, serif` |
-| Monospace | `'Courier New', Courier, monospace` |
+| Style | System stack | Notes |
+|---|---|---|
+| Modern sans | `Verdana, Geneva, sans-serif` | Highly legible at small sizes; on every major platform |
+| Geometric sans | `'Trebuchet MS', sans-serif` | Windows / macOS / iOS |
+| Humanist sans | `Tahoma, sans-serif` | Windows / macOS / iOS |
+| Serif | `Georgia, 'Times New Roman', serif` | Everywhere |
+| Monospace | `'Courier New', Courier, monospace` | Everywhere |
 
-These render at fixed widths across clients; useful for transactional figures.
+Cross-platform-safe is the goal here. `Palatino Linotype` (Windows) and `Palatino` (macOS) are metrically different fonts under similar names and neither is present on Android, so they're not a safe cross-platform stack. `Garamond` ships with Microsoft Office on Windows (not as a system font) and is absent on Android; treat it as a desktop-only choice, not a universal fallback.
 
 ## Multi-language and character coverage
 
 Pick fonts with the script and glyph coverage your audiences need. Common cases:
 
-- **Extended Latin** — accented characters (é è ç ñ ü), ligatures (œ æ), extended currency (€ £). Covers French, Spanish, German, Dutch, Italian, Portuguese, Polish, Czech, Turkish, Vietnamese, and more.
+- **Extended Latin** — accented characters (é è ç ñ ü), ligatures (œ æ), extended currency (€ £). Covers French, Spanish, German, Dutch, Italian, Portuguese, Polish, Czech, Turkish, and more.
+- **Vietnamese** — extended Latin with stacked diacritics. **Verify per-platform.** Stock Arial has imperfect Vietnamese diacritic stacking; reliable coverage typically requires Arial Unicode MS, a Vietnamese-aware variant of the family (e.g. Helvetica Neue on macOS), or a Noto font. Don't assume "extended Latin" coverage is sufficient.
 - **Cyrillic** for Russian, Ukrainian, Bulgarian, Serbian, Macedonian.
 - **Greek** for Greek-language sends.
-- **CJK** (Chinese, Japanese, Korean) — usually needs dedicated CJK fonts with much larger file sizes; prefer system stacks (`'PingFang SC'`, `'Hiragino Sans'`, `'Noto Sans CJK'`) over web fonts for size reasons.
+- **CJK** (Chinese, Japanese, Korean) — usually needs dedicated CJK fonts with much larger file sizes; prefer per-platform system stacks (see below) over web fonts for size reasons.
 - **Arabic / Hebrew** — right-to-left scripts; also affects layout direction (`dir="rtl"` on `<html>` or the language-switched element).
 - **Devanagari / Tamil / Thai / other Indic and South-East Asian scripts** — verify per-script with real content.
 
 How to get the coverage:
 
-- **Google Fonts**: use the `subset=` parameter (`latin-ext`, `cyrillic`, `greek`, `vietnamese`, etc.) or the family variants that bundle them. Bigger subsets mean bigger CSS files — only request what the audience uses.
-- **System fonts**: Arial, Helvetica, Georgia, Verdana, Tahoma cover extended Latin and most Western European scripts. For non-Latin scripts, fall back to platform-native sans/serif stacks.
+- **Google Fonts**: include the script subset in the family request. The CSS2 API (`fonts.googleapis.com/css2?...`) serves a `unicode-range`-partitioned stylesheet that lets modern browsers pick subsets per glyph automatically — in browser contexts, the legacy `subset=` parameter is now a no-op. **In email**, where `unicode-range` support is patchy, the `subset=` parameter still affects which subsets are delivered. Common subset names: `latin-ext`, `cyrillic`, `cyrillic-ext`, `greek`, `greek-ext`, `vietnamese`. Bigger subsets mean bigger CSS files — only request what the audience uses.
+- **System fonts**: Arial, Georgia, Verdana, Tahoma cover most extended-Latin diacritics on Windows / macOS / iOS reliably. Helvetica's coverage varies by platform build. For non-Latin scripts, fall back to platform-native stacks (next section).
+- **CJK system stacks**:
+  - **Simplified Chinese** — `'PingFang SC'` (macOS / iOS), `'Microsoft YaHei'` (Windows), `'Noto Sans SC'` (Linux / Android fallback)
+  - **Traditional Chinese** — `'PingFang TC'` (macOS / iOS), `'Microsoft JhengHei'` (Windows), `'Noto Sans TC'`
+  - **Japanese** — `'Hiragino Sans'` (macOS / iOS), `'Yu Gothic'` / `'Meiryo'` (Windows), `'Noto Sans JP'`
+  - **Korean** — `'Apple SD Gothic Neo'` (macOS / iOS), `'Malgun Gothic'` (Windows), `'Noto Sans KR'`
 - **Always test with real content.** A subhead that reads "café français" in proof can render as "caf□ fran□ais" with tofu (missing-glyph boxes) if the font subset is wrong.
 
 Set the `lang` attribute on `<html>` per audience, using region-specific codes where pronunciation or convention differs (`en-US` vs `en-GB`, `fr-FR` vs `fr-CA` vs `fr-BE`, `de-DE` vs `de-CH` vs `de-AT`, `zh-CN` vs `zh-TW`). For multi-language sends from a single template (rare — most multilingual programs use per-language audience groups or fully separate campaigns), set on the language-switched element instead:

@@ -59,7 +59,7 @@ Then **start from `assets/skeleton.html`** as the structural baseline. Copy it, 
 
 **Load `references/patterns.md`** when assembling sections: the eyebrow→headline→subhead rhythm, repeatable card grids with hideable filler, multi-column footer, contact blocks, pull quotes, stat rows, dividers, button variants, feature lists.
 
-**Load `references/mc-attributes.md`** alongside, to confirm placement rules for `mc:edit` (containing elements only — never inline), `mc:repeatable` (single element, usually `<tr>` or `<table>`), `mc:variant`, and `mc:hideable`. Naming conventions matter for Switch-Template compatibility.
+**Load `references/mc-attributes.md`** alongside, to confirm placement rules for `mc:edit` (containers like `<td>`/`<div>` plus the documented inline exception for `<img>`), `mc:repeatable` (block-level elements like `<tr>`/`<table>`/`<div>`/`<p>` or inline elements like `<img>`/`<a>`/`<span>` per the docs), `mc:variant`, and `mc:hideable`. Naming conventions matter for Switch-Template compatibility.
 
 ### Phase 6 — Personalization and dynamic content
 
@@ -71,13 +71,13 @@ Then **start from `assets/skeleton.html`** as the structural baseline. Copy it, 
 
 ### Phase 8 — Accessibility pass
 
-**Load `references/accessibility.md`** for any template that will ship to a real audience. Covers WCAG AA contrast targets, alt text patterns (decorative vs informative), lang attribute, semantic heading order, `role="presentation"` on layout tables, link text, and email-specific patterns (preview text, view-in-browser, plain-text alternative). Not optional for professional output.
+**Load `references/accessibility.md`** for any template that will ship to a real audience. Covers WCAG 2.2 AA targets (contrast, target size minimum), alt text patterns (decorative vs informative), `lang` attribute, semantic heading order, `role="presentation"` on layout tables, link text, and email-specific patterns (preview text, view-in-browser, plain-text alternative). Not optional for professional output.
 
 ### Phase 9 — Inline and validate
 
 **Load `references/inliner.md`** if the template uses complex selectors or will be sent through multiple ESPs. Mailchimp's built-in inliner is sufficient for most cases; pre-inline with Juice or Premailer when you need a deterministic artifact.
 
-**Run `scripts/validate.py`** before declaring the template ready. It catches the structural mistakes that silently break Mailchimp imports — inline `mc:edit`, nested `mc:edit`, duplicate names, missing compliance tags, oversized HTML.
+**Run `scripts/validate.py`** before declaring the template ready. It catches the structural mistakes that silently break Mailchimp imports — `mc:edit` on text-level inline elements (with `<img>` correctly excluded per Mailchimp's documented exception), `mc:edit` on `<table>`, nested `mc:edit`, duplicate names, missing compliance tags, oversized HTML.
 
 ### Phase 10 — Report
 
@@ -87,14 +87,14 @@ After generating, briefly summarize the editable regions, repeatable blocks, hid
 
 Things that will silently break a template if violated. Memorize these:
 
-- **`mc:edit` on a `<td>`, `<th>`, or `<div>` only.** Never on `<span>`, `<a>`, `<strong>`, or any inline element. Never on `<table>` itself — use the containing `<td>`.
-- **`mc:edit` names must be unique within a template** AND should be **consistent across templates** if the user might switch templates on an existing campaign. `header`, `body`, `sidecolumn`, `footer`, `header_image` are the conventional names — use these.
-- **Never nest `mc:edit` regions.** A `mc:edit` inside another `mc:edit` will not import.
-- **`mc:repeatable` blocks require a unique `mc:repeatable` value** (the "block type" name) and every editable region inside them needs an `mc:edit` name. Mailchimp prefixes the editable names per instance automatically.
-- **The required footer merge tags are non-negotiable**: `*|LIST:ADDRESS|*` and an unsubscribe link wrapping `*|UNSUB|*` (or `*|HTML:LIST:ADDRESS_HTML|*` + unsub). Omit them and Mailchimp will inject its own footer, which clients hate.
+- **`mc:edit` goes on a container (`<td>`, `<div>`, `<th>`) or on an `<img>`.** Per Mailchimp's docs: *"mc:edit should be used on a div, table cell, or any other element that can be considered a 'container'"* plus the documented inline exception *"mc:edit can be placed on an `<img>` element."* Never on `<span>`, `<a>`, `<strong>`, or other text-level inline elements. Never on `<table>` itself — use the containing `<td>`.
+- **`mc:edit` names must be unique within a template** AND should be **consistent across templates** if the user might switch templates on an existing campaign. `header`, `header_image`, `body`, `sidebar`, `footer` are the names Mailchimp's docs show in examples — use these where applicable so Switch Template works.
+- **Never nest `mc:edit` regions.** Mailchimp's docs: *"You shouldn't nest editable elements within other editable elements."*
+- **`mc:repeatable` blocks require a unique `mc:repeatable` value** (the "block type" name) and every editable region inside them needs an `mc:edit` name. Mailchimp scopes the editable names per instance automatically. Per the docs, `mc:repeatable` goes on block-level elements like `<div>` and `<p>` (and `<tr>`/`<table>` for table-based layouts), or on inline elements like `<img>`, `<a>`, `<span>`. Avoid list elements (`<ul>`, `<ol>`, `<li>`).
+- **The required footer merge tags are non-negotiable**: an unsubscribe link wrapping `*|UNSUB|*` plus the audience address via either `*|LIST:ADDRESS|*` (plain text) or `*|HTML:LIST_ADDRESS_HTML|*` (HTML version — note the underscore, not colon, between `LIST` and `ADDRESS`). Omit them and Mailchimp will inject its own footer, which clients hate.
 - **Use `*|MC_PREVIEW_TEXT|*` in the body**, not just rely on hidden preheader text. Mailchimp pulls preview text from this tag for the inbox preview.
-- **Image dimensions are mandatory.** Every `<img>` needs `width`, `height`, and `style="display:block"`. Outlook will explode otherwise.
-- **Critical CSS must survive as inline `style=""` attributes on the element.** Mailchimp's auto-inliner handles most cases — see `references/inliner.md` for when to pre-inline with Juice or Premailer. The reason this matters: Gmail web strips `<style>` blocks aggressively, so any visual rule that has to render in Gmail must end up inlined.
+- **Image dimensions are mandatory.** Every `<img>` needs `width`, `height`, and `style="display:block"`. Outlook will mis-size images sent without explicit attribute dimensions.
+- **Critical CSS must survive as inline `style=""` attributes on the element.** Mailchimp's CSS Inliner is **opt-in**, not automatic — see `references/inliner.md` for when to pre-inline with Juice or Premailer rather than rely on the toggle. The reason it matters: Gmail web has size limits and sanitization on `<style>` blocks and the Gmail mobile apps remap class names internally, so any visual rule that has to render reliably in Gmail must already be inlined.
 
 ## Output expectations
 

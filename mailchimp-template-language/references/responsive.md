@@ -134,11 +134,13 @@ The `!important` is necessary — email clients have aggressive resets.
 
 ## Dark mode
 
-Three independent dark mode systems exist; you can't satisfy all of them perfectly. Priorities:
+Each major client handles dark mode differently; you can't satisfy all of them perfectly. The big ones:
 
-1. **Apple Mail (macOS, iOS)** — respects `@media (prefers-color-scheme: dark)`. Mostly opt-in via meta tag.
-2. **Outlook.com web** — applies aggressive auto-inversion on light backgrounds. Cannot be fully prevented, only mitigated.
-3. **Gmail (Android, iOS)** — partial color shifting, no CSS hook.
+1. **Apple Mail (macOS, iOS)** — respects `@media (prefers-color-scheme: dark)` and the `color-scheme` meta tag. Doesn't auto-invert your colors by default; the meta tag opts you *into* dark-mode CSS so you can ship your own dark palette.
+2. **Outlook.com web** — applies aggressive auto-inversion on light backgrounds. No reliable opt-out exists as of 2026; only mitigation.
+3. **Gmail iOS app** — full inversion of light backgrounds, no CSS hook.
+4. **Gmail Android app** — partial inversion (it touches some colors, leaves others), no CSS hook.
+5. **Gmail web (desktop)** — reportedly respects `prefers-color-scheme` at the OS level since April 2024, but coverage is inconsistent — test rather than assume.
 
 ### Meta tag opt-in
 
@@ -147,7 +149,7 @@ Three independent dark mode systems exist; you can't satisfy all of them perfect
 <meta name="supported-color-schemes" content="light dark">
 ```
 
-These tell Apple Mail "I designed for both modes, don't auto-invert."
+These signal that the template has been designed to handle both modes, so Apple Mail should respect your `prefers-color-scheme` CSS rather than apply its own light-mode-only adjustments. `supported-color-schemes` is the older Apple-Mail-specific name (since macOS Mojave); `color-scheme` is the cross-browser standard. Including both is defensible belt-and-braces.
 
 ### CSS for Apple Mail dark mode
 
@@ -179,15 +181,17 @@ These tell Apple Mail "I designed for both modes, don't auto-invert."
 
 ### Outlook.com auto-inversion
 
-Outlook.com darkens light backgrounds to dark gray automatically. To preserve dark backgrounds (where text needs to stay white), wrap the section's background color in a way that won't be inverted:
+Outlook.com darkens light backgrounds to dark gray automatically. The behavior persists as of 2026 with no reliable opt-out. To preserve dark sections (where text needs to stay white), pair the `bgcolor` HTML attribute with an inline `background-color` style — Outlook.com is less likely to override a section that declares a dark background two ways:
 
 ```html
 <td bgcolor="#1a1a1a" style="background-color:#1a1a1a;">
-  <span style="color:#ffffff; mso-text-raise:0;">Stays white on dark</span>
+  <span style="color:#ffffff;">Stays white on dark</span>
 </td>
 ```
 
-The `bgcolor` attribute + `style` belt-and-braces approach is the best available defense. Don't expect perfection.
+Don't expect perfection — Outlook.com injects `data-ogsb`/`data-ogsc` attributes onto elements at render time and overrides colors selectively. The `bgcolor` + `style` belt-and-braces approach is the best available defense.
+
+(Older guides sometimes recommend `mso-text-raise:0` for this. That property is real but it controls vertical text positioning in classic Outlook *desktop* — Outlook.com is the *web* client and doesn't honor MSO properties at all. It does nothing for auto-inversion.)
 
 ## Bulletproof buttons
 
@@ -196,15 +200,15 @@ A button that renders correctly in Outlook (which ignores `padding` on `<a>` tag
 ```html
 <table role="presentation" cellpadding="0" cellspacing="0" border="0">
   <tr>
-    <td align="center" bgcolor="#3b82f6" style="border-radius:4px; mso-padding-alt:14px 28px;">
+    <td align="center" bgcolor="#2563eb" style="border-radius:4px; mso-padding-alt:14px 28px;">
       <!--[if mso]>
-      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://example.com" style="height:44px; v-text-anchor:middle; width:200px;" arcsize="10%" stroke="f" fillcolor="#3b82f6">
+      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://example.com" style="height:44px; v-text-anchor:middle; width:200px;" arcsize="10%" stroke="f" fillcolor="#2563eb">
         <w:anchorlock/>
         <center style="color:#ffffff; font-family:Arial,sans-serif; font-size:16px; font-weight:bold;">Click here</center>
       </v:roundrect>
       <![endif]-->
       <!--[if !mso]><!-- -->
-      <a href="https://example.com" style="display:inline-block; padding:14px 28px; font-family:Arial,sans-serif; font-size:16px; font-weight:bold; color:#ffffff; text-decoration:none; border-radius:4px; background-color:#3b82f6;">
+      <a href="https://example.com" style="display:inline-block; padding:14px 28px; font-family:Arial,sans-serif; font-size:16px; font-weight:bold; color:#ffffff; text-decoration:none; border-radius:4px; background-color:#2563eb;">
         Click here
       </a>
       <!--<![endif]-->
@@ -216,9 +220,10 @@ A button that renders correctly in Outlook (which ignores `padding` on `<a>` tag
 The MSO conditional uses VML (`<v:roundrect>`) to render a real button shape in Outlook. The non-MSO conditional uses standard `<a>` styling for everyone else.
 
 Adapt:
-- `arcsize="10%"` controls corner radius (10% of height = ~4-5px on a 44px button).
-- `width="200"` and `height:44px` should approximate the rendered size of the non-MSO version.
+- `arcsize="10%"` controls corner radius. Per Microsoft's VML reference, the value is a percentage of **half the smaller dimension** — on a 44px-tall button, 10% ≈ 2.2px radius (not 4-5px). Increase to 20–25% for a noticeably rounded button on small dimensions.
+- `width="200"` (set on the v:roundrect's style) and `height:44px` should approximate the rendered size of the non-MSO version so the two branches line up visually.
 - Colors must be duplicated in both branches.
+- `mso-padding-alt` on the wrapping `<td>` is intended for the *non-VML* fallback pattern (where Outlook ignores `padding` on `<a>` and the surrounding `<td>` carries the spacing). When you already have a `<v:roundrect>` that sets its own width and height, the property is largely redundant for the Outlook branch — keep it only if you also support clients that fall through to the plain `<a>`.
 
 ## Images
 
@@ -248,7 +253,7 @@ Serve images at 2x dimensions, constrain with `width`/`height` attributes:
 
 ### Background images
 
-Outlook desktop ignores CSS `background-image`. For hero sections with text over an image, use VML fallback:
+Classic Outlook for Windows (Word rendering engine) ignores CSS `background-image`. The new Outlook for Windows (WebView2/Chromium), Outlook.com web, Outlook 365 web, and Outlook for Mac all support CSS backgrounds. For templates that need to render correctly in the still-large Classic Outlook installed base, use a VML fallback:
 
 ```html
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600">
@@ -277,14 +282,21 @@ Web fonts:
 
 ```html
 <!--[if !mso]><!-->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;display=swap" rel="stylesheet">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
 </style>
 <!--<![endif]-->
 ```
 
-Outlook will fall through to your `font-family` stack. Always provide a fallback stack:
+Web-font loading coverage in 2026:
+
+- **Apple Mail (macOS, iOS), Outlook for Mac** — load reliably.
+- **Outlook 365 web** — loads for some Exchange / corporate M365 accounts; drops `@font-face` for Microsoft mailbox accounts (`outlook.com`, `live.com`, `hotmail.com`).
+- **Gmail web** — does **not** load arbitrary `@import` web fonts. The renderer ships with Roboto and Google Sans preloaded; everything else falls through to the stack.
+- **Classic Outlook for Windows (Word engine)** — never loads `@font-face`; always falls through.
+
+Always provide a fallback stack:
 
 ```css
 font-family: '{{ web-font }}', Arial, Helvetica, sans-serif;
@@ -297,19 +309,19 @@ System fonts that work everywhere without import:
 - `Georgia, 'Times New Roman', serif` (serif)
 - `'Courier New', Courier, monospace` (monospace)
 
-Common web fonts that work in many clients without `@import` (system-installed): `Verdana`, `Trebuchet MS`, `Tahoma`, `Palatino`, `Garamond`.
+Other broadly available system fonts: `Verdana`, `Trebuchet MS`, `Tahoma` (Windows / macOS / iOS). Avoid relying on `Palatino` or `Garamond` cross-platform — Palatino metrics differ between Windows ("Palatino Linotype") and macOS ("Palatino"), and neither is present on Android; Garamond ships only with Office on Windows and is missing on Android entirely.
 
 ## Common rendering pitfalls
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| Mystery space below images | inline-block default | `display:block` on every `<img>` |
-| Outlook text gigantic | DPI scaling | `<o:PixelsPerInch>96</o:PixelsPerInch>` in head MSO block |
+| Mystery space below images | `vertical-align: baseline` on inline images reserves descender space | `display:block` on every `<img>` (also fixable with `vertical-align: bottom` or `line-height: 0`) |
+| Outlook text gigantic | Windows HiDPI scaling on the Word engine (Outlook 2007–2019 desktop) | `<o:PixelsPerInch>96</o:PixelsPerInch>` in head MSO block |
 | Buttons look like links in Outlook | `padding` on `<a>` ignored | Bulletproof button pattern (VML + table) |
-| Background colors missing in Outlook | CSS-only bg | Add `bgcolor="#xxx"` attribute alongside `style` |
+| Background colors missing in Outlook | CSS-only bg (Classic Outlook for Windows) | Add `bgcolor="#xxx"` attribute alongside `style` |
 | Email looks fine in preview, broken when sent | CSS not inlined | Inline critical CSS via tool or by hand |
 | Phone numbers turn blue in iOS | Auto-linkification | `<meta name="format-detection" content="telephone=no">` |
-| Gmail clips email at 102KB | Gmail's hard limit | Trim HTML, host images externally, no inline base64 |
+| Gmail clips email at ~102 KB (web; lower thresholds on some mobile clients) | Gmail's clipping limit, with mobile variants clipping smaller | Trim HTML, host images externally, no inline base64 |
 
 ## Testing matrix
 
@@ -317,11 +329,15 @@ Minimum coverage before sending to a client:
 
 | Client | Why |
 |---|---|
-| Outlook 2016/2019/365 desktop (Windows) | Worst-case desktop renderer |
+| Classic Outlook for Windows (Word engine, current M365 / LTSC perpetual) | Worst-case desktop renderer; still present in enterprise installs |
+| New Outlook for Windows (WebView2/Chromium) | Microsoft's consumer default since April 2026; renders very differently from Classic Outlook — test both |
 | Apple Mail (macOS) | Reference modern client |
 | iOS Mail | iPhone preview, dark mode test |
-| Gmail web | CSS stripping, common webmail |
-| Gmail Android app | Mobile webmail behavior |
+| Gmail web | `<style>` size limits, sanitization edge cases |
+| Gmail iOS app | Full dark-mode inversion behavior |
+| Gmail Android app | Partial dark-mode inversion (different from iOS) |
 | Outlook.com web | Auto-inversion behavior |
+
+Office 2016 and 2019 reached end of extended support on 14 October 2025 and are no longer maintained — they're still in field installs but shouldn't be primary QA targets. Microsoft 365 perpetual / LTSC licenses keep Classic Outlook (Word engine) supported through at least 2029.
 
 Use Litmus, Email on Acid, or Mailchimp's built-in Inbox Preview (paid plans). There is no substitute for actual client rendering — desktop browser tools lie.

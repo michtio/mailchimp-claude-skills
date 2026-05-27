@@ -5,14 +5,14 @@
     "email": "michael@bleuchaud.com"
   },
   "metadata": {
-    "description": "Mailchimp authoring skills for Claude Code — custom-coded MCTL templates, responsive email patterns, accessibility, pre-upload validation.",
+    "description": "Mailchimp authoring skills for Claude Code — custom-coded MCTL templates, multilingual campaign orchestration, qualitative review + multi-template build agents, pre-upload validation.",
     "version": "1.0.0"
   },
   "plugins": [
     {
       "name": "mailchimp-claude-skills",
       "source": "./",
-      "description": "Brand-neutral toolkit for authoring custom-coded responsive Mailchimp email templates. Provides MCTL placement rules, responsive table patterns, Outlook hardening, accessibility, compliance tags, and a pre-upload validator — so prompts can focus on brand, design, and structure.",
+      "description": "Toolkit for authoring custom-coded responsive Mailchimp templates (MCTL placement, responsive scaffolding, Outlook hardening, WCAG 2.2 AA accessibility, CSS inlining, pre-upload validator) and orchestrating multilingual campaigns (MC_LANGUAGE field, IF:MC_LANGUAGE conditional content, segments-vs-conditional decision tree, multi-market template forking). Includes a qualitative review agent and a multi-template build agent. Brand-neutral throughout.",
       "version": "1.0.0",
       "author": {
         "name": "michtio"
@@ -31,10 +31,12 @@
         "mc-repeatable",
         "mc-variant",
         "mc-hideable",
+        "mc-language",
+        "multilingual-email",
         "outlook-email",
         "email-marketing",
         "accessibility",
-        "wcag"
+        "wcag-2-2"
       ],
       "category": "email"
     }

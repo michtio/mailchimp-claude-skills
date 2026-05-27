@@ -8,7 +8,7 @@ Five structural archetypes for the most common Mailchimp campaign types. Each bl
 |---|---|
 | "monthly newsletter", "digest", "roundup", "issue" | **Newsletter** |
 | "promo", "sale", "campaign", "product launch", "limited time" | **Promotional** |
-| "order confirmation", "receipt", "invoice", "booking confirmation" | **Transactional** (note: usually goes via Mandrill, not regular Mailchimp campaigns) |
+| "order confirmation", "receipt", "invoice", "booking confirmation" | **Transactional** (high-volume transactional usually goes via Mandrill / Mailchimp Transactional, which has its own templating; small-volume transactional via Mailchimp campaigns works fine with MCTL) |
 | "we're launching", "announcement", "important update", "we shipped" | **Announcement** |
 | "winback", "we miss you", "haven't seen you", "re-engage" | **Re-engagement** |
 
@@ -171,7 +171,7 @@ footer_compliance, footer_business_id
 
 - Most transactional data comes from merge fields populated via the API at send time: `*|ORDER_ID|*`, `*|ORDER_TOTAL|*`, etc.
 - `*|CURRENT_YEAR|*` for the footer copyright.
-- For real Mandrill/Transactional templates, Handlebars `{{order_total}}` replaces MCTL — same blueprint, different syntax.
+- For Mandrill / Mailchimp Transactional templates, the merge language is configurable per account (Settings → Sending Defaults → Merge Language), with Handlebars `{{order_total}}` as the recommended option and MCTL `*|ORDER_TOTAL|*` as the legacy option. Same blueprint, different syntax depending on what the account has set.
 
 ### Pitfalls
 

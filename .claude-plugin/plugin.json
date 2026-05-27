@@ -1,6 +1,6 @@
 {
   "name": "mailchimp-claude-skills",
-  "description": "Brand-neutral toolkit for authoring custom-coded responsive Mailchimp email templates with full MCTL support. Covers mc:edit / mc:repeatable / mc:variant / mc:hideable placement, merge tags and conditionals, the responsive table scaffold, Outlook hardening (MSO conditionals, VML bulletproof buttons), dark mode, accessibility (WCAG AA contrast, alt text, lang attribute, semantic order, role=presentation), CSS inlining workflow, and a pre-upload validator that catches the structural mistakes that silently break Mailchimp imports. Ships with a brand-neutral skeleton, a structural pattern library (section openers, repeatable card grids with hideable filler, multi-column footer, contact blocks, pull quotes, stat rows, dividers, button variants, feature lists), and five archetype blueprints (newsletter, promotional, transactional, announcement, re-engagement).",
+  "description": "Toolkit for authoring custom-coded responsive Mailchimp email templates and orchestrating multilingual campaigns. Ships two brand-neutral skills (mailchimp-template-language for MCTL placement, responsive scaffolding, Outlook hardening, accessibility, CSS inlining; mailchimp-multilingual for MC_LANGUAGE / IF:MC_LANGUAGE conditional content / segments-vs-conditional decision tree / multi-market template forking) plus two agents (mailchimp-template-reviewer for qualitative review across accessibility, cross-client risk, and compliance; mailchimp-template-builder for layered build-verify gates and multi-template parallel orchestration). Includes a pre-upload validator that catches structural mistakes (mc:edit placement, duplicates, nesting, oversized HTML, missing compliance tags), a brand-neutral skeleton (XHTML 1.0 Transitional doctype, full MSO conditionals, dark-mode media query, bulletproof button, WCAG 2.2 AA-clean defaults), a 10-pattern structural library, and 5 archetype blueprints (newsletter, promotional, transactional, announcement, re-engagement).",
   "version": "1.0.0",
   "homepage": "https://github.com/michtio/mailchimp-claude-skills",
   "author": {
@@ -17,12 +17,15 @@
     "mc-repeatable",
     "mc-variant",
     "mc-hideable",
+    "mc-language",
+    "multilingual-email",
     "outlook-email",
     "email-marketing",
     "accessibility",
-    "wcag"
+    "wcag-2-2"
   ],
   "skills": [
-    "./mailchimp-template-language"
+    "./mailchimp-template-language",
+    "./mailchimp-multilingual"
   ]
 }

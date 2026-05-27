@@ -2,8 +2,9 @@
 #
 # Mailchimp Claude Skills — Uninstaller
 #
-# Removes symlinks created by install.sh. Only removes symlinks that point
-# back to this repository — manually created files are never touched.
+# Removes symlinks created by install.sh from ~/.claude/skills/ and
+# ~/.claude/agents/. Only removes symlinks that point back to this repository
+# — manually created files are never touched.
 #
 
 set -euo pipefail
@@ -11,6 +12,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CLAUDE_DIR="${HOME}/.claude"
 SKILLS_DIR="${CLAUDE_DIR}/skills"
+AGENTS_DIR="${CLAUDE_DIR}/agents"
 
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
@@ -43,10 +45,30 @@ for skill_dir in "${SCRIPT_DIR}/"*/; do
     fi
 done
 
+if [ -d "${SCRIPT_DIR}/agents" ]; then
+    echo ""
+    echo "Agents:"
+    for agent_file in "${SCRIPT_DIR}/agents/"*.md; do
+        [ -f "${agent_file}" ] || continue
+
+        agent_name="$(basename "${agent_file}")"
+        target="${AGENTS_DIR}/${agent_name}"
+
+        if [ -L "${target}" ] && [ "$(readlink "${target}")" = "${agent_file}" ]; then
+            rm "${target}"
+            echo -e "  ${GREEN}✓ Removed ${agent_name%.md}${NC}"
+            ((removed++))
+        elif [ -e "${target}" ]; then
+            echo -e "  ${YELLOW}⚠ ${agent_name%.md}${NC} — not a symlink to this repo, skipping"
+            ((skipped++))
+        fi
+    done
+fi
+
 echo ""
 echo "======================================"
 echo -e "  ${GREEN}Removed:${NC} ${removed}"
 echo -e "  ${YELLOW}Skipped:${NC} ${skipped}"
 echo ""
-echo "Done. Skills have been unlinked."
+echo "Done. Symlinks have been removed."
 echo "The repository at ${SCRIPT_DIR} has not been deleted."

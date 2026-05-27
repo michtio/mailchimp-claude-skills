@@ -14,9 +14,15 @@ The fundamental attribute. Marks a container as user-editable in the Mailchimp c
 
 ### Placement rules
 
-- Apply to **container elements only**: `<td>`, `<th>`, or `<div>`. Never on `<table>`, `<tr>`, or any inline element.
-- Apply to a **single element wrapping the editable content**, not multiple sibling elements.
-- The entire contents of the marked element become editable. The element itself stays put (it's the container, not the content).
+Mailchimp's official template-language doc states: *"mc:edit should be used on a div, table cell, or any other element that can be considered a 'container.'"* Plus a documented exception: *"mc:edit can be placed on an `<img>` element. This will allow the image to be replaced, resized, and edited using the Mailchimp campaign editor."*
+
+What that means in practice:
+
+- **Container elements** are the primary target — typically `<td>` or `<div>`. `<th>` is a table cell and works the same way, though it's not named in Mailchimp's examples.
+- **`<img>` is the one documented exception** — `mc:edit` on `<img>` lets the editor replace, resize, and edit the image directly.
+- **Never on `<span>`, `<a>`, `<strong>`, or other text-level inline elements.** These aren't containers and Mailchimp's editor won't surface them.
+- **Never on `<table>` itself** — use the containing `<td>`. Mailchimp's docs caution against this; the editor can't reliably wrap a whole table as editable content.
+- Apply to a **single element wrapping the editable content**, not multiple sibling elements. The entire contents of the marked element become editable. The element itself stays put (it's the container, not the content).
 
 ### Naming rules
 
@@ -27,30 +33,30 @@ Names must be:
 
 ### Conventional names
 
-Use these wherever possible:
+Mailchimp's docs show these names in examples for Switch-Template compatibility (*"If the user switches templates after writing content, they could lose their copy if the editable space names aren't consistent"*):
 
-| Name | Purpose |
-|---|---|
-| `header` | Top section, often the logo |
-| `header_image` | Hero image specifically |
-| `preheader` | Preview text region (if exposed in editor) |
-| `body` | Main content area |
-| `sidecolumn` | Right or left sidebar in multi-column layouts |
-| `footer` | Bottom section, before compliance |
-| `footer_address` | Required physical address (if separated from main footer) |
+| Name | Source | Purpose |
+|---|---|---|
+| `header` | Docs | Top section, often the logo |
+| `header_image` | Docs | Hero image specifically |
+| `body` | Docs | Main content area |
+| `sidebar` | Docs | Right or left sidebar in multi-column layouts |
+| `footer` | Docs | Bottom section, before compliance |
+| `preheader` | Convention | Preview text region (if exposed in editor) |
+| `footer_address` | Convention | Required physical address (if separated from main footer) |
 
-Custom names are fine for one-off templates. For agency-style template families (where the user maintains many similar templates), normalize on these names so Switch Templates works.
+The "Source" column distinguishes names that appear in Mailchimp's official template-language documentation from names that are community convention but stable in production. Custom names are fine for one-off templates. For agency-style template families (where the user maintains many similar templates), normalize on the documented names so Switch Templates works.
 
 ### What's NOT allowed
 
 ```html
-<!-- WRONG: inline element -->
+<!-- WRONG: text-level inline element -->
 <span mc:edit="cta">Click here</span>
 
 <!-- WRONG: on the table itself -->
 <table mc:edit="body" ...>...</table>
 
-<!-- WRONG: nested -->
+<!-- WRONG: nested (Mailchimp's docs: "You shouldn't nest editable elements within other editable elements.") -->
 <td mc:edit="body">
   <p>Welcome <span mc:edit="name">Friend</span>!</p>
 </td>
@@ -65,7 +71,7 @@ Custom names are fine for one-off templates. For agency-style template families 
 ```html
 <!-- Right: on a containing td -->
 <td mc:edit="cta_button" align="center" style="padding:24px;">
-  <a href="*|MC:URL|*" style="background:#3b82f6; color:#fff; padding:12px 24px; text-decoration:none; display:inline-block;">Click here</a>
+  <a href="https://example.com" style="background:#2563eb; color:#fff; padding:12px 24px; text-decoration:none; display:inline-block;">Click here</a>
 </td>
 
 <!-- Right: on a div inside a td (also fine) -->
@@ -74,6 +80,9 @@ Custom names are fine for one-off templates. For agency-style template families 
     <a href="..." style="...">Click here</a>
   </div>
 </td>
+
+<!-- Right: directly on <img> — Mailchimp's documented inline exception -->
+<img mc:edit="hero_image" src="https://cdn.example.com/hero.jpg" width="600" height="300" alt="" style="display:block;">
 ```
 
 ## `mc:repeatable` — repeatable block
@@ -103,8 +112,10 @@ Marks a block that the user can duplicate in the editor. Use for product cards, 
 ### Rules
 
 - `mc:repeatable="<block_type>"` — the value is the **block type name**, not the instance identifier. Multiple blocks of the same type share the value (`mc:repeatable="product"` on three different `<tr>` elements means the user can add more "product" blocks).
-- The repeatable element must be a single HTML element (typically `<tr>` or `<table>`). Mailchimp duplicates this entire element when the user clicks "Add block."
-- Editable regions inside a repeatable get **auto-prefixed** by Mailchimp per instance. You define them once with their base name; Mailchimp generates `product_image_1`, `product_image_2`, etc. internally.
+- Mailchimp's docs: *"Use mc:repeatable on block-level elements (like `<div>` and `<p>`) with the exception of lists, or inline elements (like `<img>`, `<a>`, and `<span>`)."* In practice, table-based email templates use `<tr>` or `<table>` because that's the layout primitive; `<div>` and `<p>` work for non-table layouts. Avoid `<ul>`, `<ol>`, `<li>`.
+- Mailchimp duplicates the entire marked element when the user clicks "Add block."
+- Editable regions inside a repeatable get scoped per-instance by Mailchimp — you define each `mc:edit` once with its base name and Mailchimp tracks instances separately in the editor. (The exact internal naming scheme — e.g. `product_image_1`, `product_image_2` — isn't formally documented; what matters is that each repeated instance gets its own editable state.)
+- **Nested repeatables are allowed.** Mailchimp's docs: *"mc:repeatable elements can be nested within each other, but use care."* Useful for sections-containing-cards patterns, but the editor UI gets denser fast.
 - Different repeatable block types in the same template need different `mc:repeatable` values.
 
 ### Optional: control over what can be added
@@ -171,37 +182,29 @@ The named form works reliably (the editor accepts it; tested in production) and 
 
 There is no documented way to default a block to hidden via the template attribute. Initial visibility (on/off per campaign) is controlled by the editor, not the template. Older community guides occasionally claim `mc:hideable="hide"` defaults hidden — this is not supported by Mailchimp's docs and should not be relied on.
 
-## `mc:allowdesignmodule` — drag-and-drop drop zones
+## `mc:allowdesignmodule` — drag-and-drop drop zones (unverified)
 
-For templates that should accept Mailchimp's built-in content blocks (image, text, divider, button, etc.) at specific locations:
+Some Mailchimp documentation and community guides reference an attribute for accepting Mailchimp's built-in content blocks (image, text, divider, button, etc.) inside a custom-coded region. The exact attribute name and value syntax are **not present** on the current `templates.mailchimp.com/getting-started/template-language/` page — Mailchimp's classic versus new builder split has changed which drag-and-drop blocks are exposed and how.
 
-```html
-<table role="presentation" width="100%">
-  <tr>
-    <td mc:allowdesignmodule="all">
-      <!-- User can drag any content block type into this region -->
-    </td>
-  </tr>
-</table>
-```
+If you need a template that mixes hand-coded regions with drag-and-drop authoring:
 
-Values: `all` (any block type), or a comma-separated list like `image,text,button`.
+1. Don't take this section as authoritative — test against your target Mailchimp account before relying on it.
+2. The pure custom-coded path with `mc:edit` regions and `mc:repeatable` blocks is fully documented and doesn't require any drag-and-drop attribute.
 
-This is mostly relevant if you're building a template that mixes hand-coded regions with drag-and-drop authoring. For pure custom-coded templates with `mc:edit` regions, you don't need this.
+For most templates, skip this entirely.
 
 ## Quick reference table
 
 | Attribute | Placement | Value | Effect |
 |---|---|---|---|
-| `mc:edit="name"` | `<td>`, `<th>`, or `<div>` | unique region name | Marks contents as user-editable |
-| `mc:repeatable="type"` | single element (often `<tr>`) | block type name | User can duplicate this block |
+| `mc:edit="name"` | `<td>`, `<div>`, `<th>`, or `<img>` (docs name `<img>` explicitly) | unique region name | Marks element as user-editable |
+| `mc:repeatable="type"` | block element (`<tr>`, `<table>`, `<div>`, `<p>`) or inline (`<img>`, `<a>`, `<span>`); **not** list elements | block type name | User can duplicate this block |
 | `mc:variant="name"` | same element as `mc:repeatable` | variant name | Alternative design for the block type |
 | `mc:hideable` | single element | valueless (spec) or `="label"` (convention) | User can toggle block visibility |
-| `mc:allowdesignmodule="..."` | container | `all` or block list | Accepts drag-and-drop content blocks |
 
 ## Order of attributes on a single element
 
-When multiple `mc:*` attributes appear on the same element, order doesn't matter to Mailchimp's parser. For readability, use:
+When multiple `mc:*` attributes appear on the same element, XML attribute order is irrelevant in any spec-compliant parser. For readability, use:
 
 ```html
 <tr mc:repeatable="product" mc:variant="featured" mc:hideable>
@@ -210,6 +213,6 @@ When multiple `mc:*` attributes appear on the same element, order doesn't matter
 ## Common import failures and what causes them
 
 1. **"Editable section names must be unique"** — duplicate `mc:edit` values. Search the file for the value, deduplicate.
-2. **Region present in HTML but not editable in Mailchimp** — `mc:edit` is on an inline element or nested inside another `mc:edit`. Move it to the containing block element.
-3. **Repeatable shows up but can't be duplicated** — `mc:repeatable` is on a `<td>` rather than `<tr>` or a `<table>`. The repeatable target must be a complete sub-tree.
+2. **Region present in HTML but not editable in Mailchimp** — `mc:edit` is on a text-level inline element (e.g. `<span>`, `<a>`, `<strong>`) or nested inside another `mc:edit`. Move it to the containing block element. (Note: `<img>` is an explicit exception — Mailchimp's docs permit `mc:edit` on `<img>`.)
+3. **Repeatable shows up but can't be duplicated** — `mc:repeatable` is on a `<td>` rather than `<tr>` or a `<table>` (in table-based layouts), or on a list element (`<ul>`/`<ol>`/`<li>`). The repeatable target must be a complete sub-tree.
 4. **Editor shows the region but content vanishes on save** — almost always a malformed HTML structure (unclosed tag, mismatched `<td>`/`<tr>`). Run the HTML through a validator.

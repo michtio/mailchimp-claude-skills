@@ -170,7 +170,7 @@ Universal footer pattern: brand mark, two or three link columns, social icons, t
       <tr>
         <td mc:edit="footer_compliance" style="padding-top:16px; font-family:{{ body-font }}; font-size:11px; line-height:1.6; color:{{ color-muted }};">
           &copy; *|CURRENT_YEAR|* *|LIST:COMPANY|*<br>
-          *|HTML:LIST:ADDRESS_HTML|*<br>
+          *|HTML:LIST_ADDRESS_HTML|*<br>
           <a href="*|UNSUB|*">Unsubscribe</a> &middot; <a href="*|UPDATE_PROFILE|*">Update preferences</a>
         </td>
       </tr>
