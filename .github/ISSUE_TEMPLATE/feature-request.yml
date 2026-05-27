@@ -1,0 +1,60 @@
+name: Feature Request
+description: Suggest a new skill, pattern, blueprint, or capability expansion.
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      description: What kind of addition is this?
+      options:
+        - new pattern (add to patterns.md)
+        - new blueprint (add a campaign archetype)
+        - new reference file (add coverage to an existing skill)
+        - validator check (add a pre-upload check to validate.py)
+        - new skill (entirely new skill area — e.g., mailchimp-multilingual)
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What would you like to see added or changed?
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use case
+      description: What email-authoring task would this help with? What prompt would trigger this?
+      placeholder: |
+        Describe a real scenario where Claude doesn't have the right guidance today.
+        e.g., "When I ask Claude to build a re-engagement email with a survey, it doesn't know to wire a hideable survey-results recap section."
+    validations:
+      required: true
+
+  - type: textarea
+    id: example-prompt
+    attributes:
+      label: Example prompt
+      description: Show a realistic prompt that should work better with this feature.
+      placeholder: |
+        e.g., "Build a re-engagement email for our quarterly product survey: hero with empathetic opener, a survey CTA button, and a hideable 'what we learned last quarter' recap section."
+    validations:
+      required: false
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Links to Mailchimp docs, email-design references, real-world example sends, or any production template that demonstrates the feature.
+      placeholder: |
+        - https://mailchimp.com/help/...
+        - https://templates.mailchimp.com/...
+        - https://reallygoodemails.com/...
+    validations:
+      required: false

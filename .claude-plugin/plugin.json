@@ -1,0 +1,28 @@
+{
+  "name": "mailchimp-claude-skills",
+  "description": "Brand-neutral toolkit for authoring custom-coded responsive Mailchimp email templates with full MCTL support. Covers mc:edit / mc:repeatable / mc:variant / mc:hideable placement, merge tags and conditionals, the responsive table scaffold, Outlook hardening (MSO conditionals, VML bulletproof buttons), dark mode, accessibility (WCAG AA contrast, alt text, lang attribute, semantic order, role=presentation), CSS inlining workflow, and a pre-upload validator that catches the structural mistakes that silently break Mailchimp imports. Ships with a brand-neutral skeleton, a structural pattern library (section openers, repeatable card grids with hideable filler, multi-column footer, contact blocks, pull quotes, stat rows, dividers, button variants, feature lists), and five archetype blueprints (newsletter, promotional, transactional, announcement, re-engagement).",
+  "version": "1.0.0",
+  "homepage": "https://github.com/michtio/mailchimp-claude-skills",
+  "author": {
+    "name": "michtio"
+  },
+  "keywords": [
+    "mailchimp",
+    "mctl",
+    "email-template",
+    "responsive-email",
+    "html-email",
+    "merge-tags",
+    "mc-edit",
+    "mc-repeatable",
+    "mc-variant",
+    "mc-hideable",
+    "outlook-email",
+    "email-marketing",
+    "accessibility",
+    "wcag"
+  ],
+  "skills": [
+    "./mailchimp-template-language"
+  ]
+}

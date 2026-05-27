@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: General questions and discussion
+    url: https://github.com/michtio/mailchimp-claude-skills/discussions
+    about: Ask questions, share prompts, or discuss Mailchimp templates with Claude Code.
+  - name: Mailchimp template language docs
+    url: https://templates.mailchimp.com/getting-started/template-language/
+    about: Mailchimp's own template language documentation — check here first if you're unsure whether a pattern is supported.
+  - name: Mailchimp merge tag cheat sheet
+    url: https://mailchimp.com/help/all-the-merge-tags-cheat-sheet/
+    about: Mailchimp's official catalog of merge tags and what they produce.

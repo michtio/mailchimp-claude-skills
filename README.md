@@ -1,6 +1,15 @@
 # mailchimp-claude-skills
 
-Anthropic Agent Skills for authoring Mailchimp email templates from Claude (Claude Code, Claude.ai, API). The skills handle the boring-but-critical correctness layer — MCTL placement, responsive tables, Outlook hardening, accessibility, compliance — so prompts can focus on brand, design, and structure.
+> Anthropic Agent Skills for authoring [Mailchimp](https://mailchimp.com/) email templates from [Claude Code](https://docs.anthropic.com/en/docs/claude-code), Claude.ai, or the Anthropic API. The skills handle the boring-but-critical correctness layer — MCTL placement, responsive tables, Outlook hardening, accessibility, compliance — so prompts can focus on brand, design, and structure.
+
+Built and maintained by [michtio](https://github.com/michtio) at [Bleu Chaud](https://bleuchaud.com).
+
+## Support
+
+If this project saves you time, consider supporting its development:
+
+- [GitHub Sponsors](https://github.com/sponsors/michtio)
+- [Buy Me a Coffee](https://buymeacoffee.com/michtio)
 
 ## Skills
 
@@ -88,21 +97,34 @@ The skill handles these without prompting:
 
 ## Installation
 
-### Claude Code
+### Claude Code Plugin (recommended)
 
 ```bash
-# personal scope (all your projects)
-cp -r mailchimp-template-language ~/.claude/skills/
-
-# or project scope (committed with the client repo)
-mkdir -p .claude/skills
-cp -r mailchimp-template-language .claude/skills/
+# First time: add the marketplace, then install
+/plugin marketplace add michtio/mailchimp-claude-skills
+/plugin install mailchimp-claude-skills@michtio/mailchimp-claude-skills
 ```
 
-Or symlink during development so edits to the repo flow through:
+### Clone and run `install.sh`
 
 ```bash
+git clone https://github.com/michtio/mailchimp-claude-skills.git ~/.claude/mailchimp-claude-skills
+cd ~/.claude/mailchimp-claude-skills && bash install.sh
+```
+
+`install.sh` symlinks every skill in this repo (any directory containing a `SKILL.md`) into `~/.claude/skills/`, so updates flow through automatically when you `git pull`. Run `bash uninstall.sh` to remove the symlinks. Manually-installed skills are never touched.
+
+### Manual copy / symlink
+
+```bash
+# Copy into personal scope
+cp -r mailchimp-template-language ~/.claude/skills/
+
+# Or symlink during development
 ln -s "$(pwd)/mailchimp-template-language" ~/.claude/skills/mailchimp-template-language
+
+# Or project scope (committed with the client repo)
+mkdir -p .claude/skills && cp -r mailchimp-template-language .claude/skills/
 ```
 
 Restart your Claude Code session and the skill appears in the available skills list.

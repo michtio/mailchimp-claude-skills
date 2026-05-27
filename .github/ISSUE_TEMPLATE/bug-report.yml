@@ -1,0 +1,98 @@
+name: Bug Report
+description: A skill or reference file caused Claude to generate incorrect code or give bad guidance — or the validator missed a real issue.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: skill
+    attributes:
+      label: Skill
+      description: Which skill is affected?
+      options:
+        - mailchimp-template-language
+        - other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the skill is involved?
+      options:
+        - MCTL attributes (mc:edit, mc:repeatable, mc:variant, mc:hideable)
+        - merge tags / conditionals
+        - responsive design / mobile
+        - dark mode
+        - Outlook hardening / MSO conditionals
+        - accessibility / WCAG
+        - typography / token system
+        - blueprints / archetypes
+        - patterns (cards, footer, buttons, etc.)
+        - CSS inlining
+        - validator (validate.py)
+        - skeleton.html
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: prompt
+    attributes:
+      label: Your prompt
+      description: What did you ask Claude? Paste the exact prompt or a close paraphrase.
+      placeholder: "e.g., 'Build a Mailchimp newsletter with three repeatable section blocks and a hideable promo row.'"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should Claude have generated or recommended?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What did Claude actually generate? Include the incorrect code, wrong pattern, or bad guidance.
+      placeholder: |
+        Paste Claude's response, the generated HTML, or describe the incorrect behavior.
+        Use code fences (```) for code blocks.
+    validations:
+      required: true
+
+  - type: input
+    id: reference-file
+    attributes:
+      label: Reference file
+      description: If you know which reference file contains the incorrect information, provide the path.
+      placeholder: "e.g., mailchimp-template-language/references/merge-tags.md"
+    validations:
+      required: false
+
+  - type: input
+    id: client
+    attributes:
+      label: Email client (if rendering issue)
+      placeholder: "e.g., Outlook 365 desktop, Gmail web, Apple Mail iOS"
+    validations:
+      required: false
+
+  - type: input
+    id: claude-version
+    attributes:
+      label: Claude Code version
+      placeholder: "e.g., 1.0.16"
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Mailchimp import error message (if any), Litmus/EoA screenshots, links to Mailchimp docs that contradict the skill content.
+    validations:
+      required: false

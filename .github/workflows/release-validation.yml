@@ -1,0 +1,113 @@
+name: release-validation
+
+# Fires on every tag push that looks like a version (`v1.2.3`, `v1.2.3-beta.1`, etc.).
+# Two jobs run in sequence:
+#   1. validate-manifest-versions — confirms the .claude-plugin/* version sites
+#      match the tag. Catches drift like 1.2.1 / 1.3.0 shipping with stale 1.2.0
+#      manifests.
+#   2. publish-release — extracts the matching CHANGELOG.md section and creates
+#      a GitHub Release with the tag, title, and notes.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  validate-manifest-versions:
+    name: Manifest versions match tag
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compare versions
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TAG="${GITHUB_REF_NAME}"        # e.g. v1.3.1
+          EXPECTED="${TAG#v}"             # strip leading 'v' → 1.3.1
+
+          PLUGIN_VERSION=$(jq -r '.version' .claude-plugin/plugin.json)
+          MARKETPLACE_METADATA_VERSION=$(jq -r '.metadata.version' .claude-plugin/marketplace.json)
+          MARKETPLACE_PLUGIN_VERSION=$(jq -r '.plugins[0].version' .claude-plugin/marketplace.json)
+
+          echo "tag                                : ${TAG}"
+          echo "expected version                   : ${EXPECTED}"
+          echo "plugin.json .version               : ${PLUGIN_VERSION}"
+          echo "marketplace.json .metadata.version : ${MARKETPLACE_METADATA_VERSION}"
+          echo "marketplace.json .plugins[0].ver.  : ${MARKETPLACE_PLUGIN_VERSION}"
+
+          fail=0
+          if [ "${PLUGIN_VERSION}" != "${EXPECTED}" ]; then
+            echo "::error file=.claude-plugin/plugin.json::version is '${PLUGIN_VERSION}', expected '${EXPECTED}'"
+            fail=1
+          fi
+          if [ "${MARKETPLACE_METADATA_VERSION}" != "${EXPECTED}" ]; then
+            echo "::error file=.claude-plugin/marketplace.json::metadata.version is '${MARKETPLACE_METADATA_VERSION}', expected '${EXPECTED}'"
+            fail=1
+          fi
+          if [ "${MARKETPLACE_PLUGIN_VERSION}" != "${EXPECTED}" ]; then
+            echo "::error file=.claude-plugin/marketplace.json::plugins[0].version is '${MARKETPLACE_PLUGIN_VERSION}', expected '${EXPECTED}'"
+            fail=1
+          fi
+
+          if [ "${fail}" -ne 0 ]; then
+            echo
+            echo "Manifest versions do not match the pushed tag. Run \`bin/release.sh ${EXPECTED}\` and re-tag." >&2
+            exit 1
+          fi
+
+          echo
+          echo "All manifest versions match ${TAG}."
+
+  validate-skeleton:
+    name: Validator passes on bundled skeleton
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run validator (strict)
+        run: |
+          python3 mailchimp-template-language/scripts/validate.py \
+            mailchimp-template-language/assets/skeleton.html --strict
+
+  publish-release:
+    name: Publish GitHub Release
+    needs: [validate-manifest-versions, validate-skeleton]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract CHANGELOG section for tag
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+
+          # Extract everything between "## VERSION " and the next "## " heading.
+          awk -v ver="$VERSION" '
+            $0 ~ "^## " ver "[ \t]" { capture=1; next }
+            capture && /^## [0-9]/ { exit }
+            capture { print }
+          ' CHANGELOG.md > /tmp/release-notes.md
+
+          if [ -z "$(tr -d '[:space:]' < /tmp/release-notes.md)" ]; then
+            echo "::error file=CHANGELOG.md::No '## ${VERSION}' section found. Add the entry and re-tag."
+            exit 1
+          fi
+
+          echo "Release notes (first 20 lines):"
+          head -20 /tmp/release-notes.md
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "${GITHUB_REF_NAME}" \
+            --notes-file /tmp/release-notes.md

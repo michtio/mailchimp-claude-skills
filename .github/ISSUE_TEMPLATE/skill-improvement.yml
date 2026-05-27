@@ -1,0 +1,80 @@
+name: Skill Improvement
+description: Fix incorrect information, add a missing pattern or blueprint, or update outdated content in a skill or reference file.
+title: "[Improvement] "
+labels: ["improvement"]
+body:
+  - type: input
+    id: file
+    attributes:
+      label: File
+      description: Path to the skill or reference file that needs updating.
+      placeholder: "e.g., mailchimp-template-language/references/responsive.md"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: skill
+    attributes:
+      label: Skill
+      description: Which skill does this file belong to?
+      options:
+        - mailchimp-template-language
+        - other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: Issue type
+      description: What kind of problem is this?
+      options:
+        - incorrect information
+        - missing pattern / blueprint
+        - outdated for current Mailchimp behavior
+        - code example error
+        - missing pitfall
+        - cross-reference issue
+        - accessibility / WCAG concern
+        - rendering issue in a specific client
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-content
+    attributes:
+      label: Current content
+      description: What does the file currently say? Paste the relevant section.
+      render: markdown
+    validations:
+      required: false
+
+  - type: textarea
+    id: suggested-change
+    attributes:
+      label: Suggested change
+      description: What should it say instead? Be specific — include corrected text, additional patterns, or the missing information.
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Link to Mailchimp's docs, the W3C / WCAG spec, an email-developer reference (Litmus, Email on Acid), or a tested client behavior that supports your change.
+      placeholder: |
+        - https://templates.mailchimp.com/getting-started/template-language/
+        - https://mailchimp.com/help/...
+        - Tested in Outlook 365 desktop — the current pattern produces extra whitespace
+    validations:
+      required: true
+
+  - type: textarea
+    id: prompt
+    attributes:
+      label: Your prompt
+      description: If a prompt exposed this issue, share it so we can verify the fix works.
+      placeholder: "e.g., 'Add a stat row to the hero section' — Claude generated stats that don't stack on mobile."
+    validations:
+      required: false
