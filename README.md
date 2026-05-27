@@ -150,7 +150,11 @@ This repo fills the gap with hand-authored MCTL tooling tuned to Mailchimp's qui
 
 Likely future skills (built when real client demand drives them):
 
-- `mailchimp-multilingual` — Patterns for multi-language sends using `*|TRANSLATE|*`, audience groups, and per-language audience splits. Applies anywhere two or more languages share a list — Switzerland (DE/FR/IT/RM), Belgium (NL/FR/DE), Canada (EN/FR), Singapore (EN/ZH/MS/TA), and others.
+- `mailchimp-multilingual` — Campaign-level patterns for sending in multiple languages. Two distinct shapes:
+  - **Single list, multiple languages** (one audience, members speak different languages): `*|TRANSLATE|*`, audience groups, conditional content blocks. Common in countries with multiple official languages — Switzerland (DE/FR/IT/RM), Belgium (NL/FR/DE), Canada (EN/FR), Singapore (EN/ZH/MS/TA).
+  - **Global brand, multiple markets** (separate audiences per market, often separate Mailchimp accounts or sub-accounts): template syndication / forking workflow, per-market regional adaptations (currency, regulations, product lineup, brand voice), multi-account orchestration. Common in international consumer brands.
+
+  Template-level concerns (`lang` attribute, character coverage, per-script font stacks, RTL handling) are already handled by `mailchimp-template-language` for both shapes — what this skill adds is the audience and campaign orchestration on top.
 - `mailchimp-rss-driven` — Templates wired for Mailchimp's RSS-to-email automations, with `*|RSSITEM|*` patterns.
 - `mailchimp-product-feed` — E-commerce templates with product-grid merge tags for Shopify/WooCommerce integrations.
 - `mailchimp-transactional-handlebars` — Separate skill for Mandrill/Transactional (different syntax: Handlebars, not MCTL).
