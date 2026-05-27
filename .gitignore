@@ -1,0 +1,19 @@
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# Test outputs from validator
+test-*.html
+*.test.html
